@@ -1,0 +1,34 @@
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IDE
+.idea/
+.vscode/
+*.sublime-*
+
+# Node / React
+node_modules/
+admin-react/dist/
+admin-react/node_modules/
+
+# WordPress
+wordpress/wp-config.php
+wordpress/.htaccess
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.env
+venv/
+.venv/
+
+# Docker
+.docker/
+
+# Project specific
+scripts/*.json
+*.log

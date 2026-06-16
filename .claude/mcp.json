@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "mysql": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-mysql"
+      ],
+      "env": {
+        "MYSQL_HOST": "localhost",
+        "MYSQL_PORT": "3306",
+        "MYSQL_DATABASE": "sap_panda",
+        "MYSQL_USER": "root",
+        "MYSQL_PASSWORD": "U1s@t3c4"
+      }
+    }
+  }
+}

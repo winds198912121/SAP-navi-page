@@ -1,0 +1,142 @@
+/* ============================================================
+   Admin Panel Styles — コース・ナレッジ管理
+   ============================================================ */
+
+/* Shell layout */
+.admin-shell { display: flex; min-height: 100vh; background: #f5f0e8; font-family: "Noto Sans JP", system-ui, sans-serif; color: #2a2317; }
+
+/* ===== Sidebar ===== */
+.admin-sidebar { width: 240px; background: #2a2317; color: rgba(255,255,255,0.8); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; }
+.admin-sidebar-head { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; align-items: center; gap: 8px; }
+.admin-logo { font-family: "Zen Maru Gothic", system-ui, sans-serif; font-weight: 700; font-size: 16px; color: white; text-decoration: none; }
+.admin-badge { font-size: 9.5px; font-weight: 700; padding: 2px 7px; border-radius: 999px; background: #5a9d6e; color: white; text-transform: uppercase; letter-spacing: 0.08em; }
+.admin-nav { flex: 1; padding: 12px 10px; display: flex; flex-direction: column; gap: 2px; }
+.admin-nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; color: rgba(255,255,255,0.65); text-decoration: none; font-size: 13.5px; font-weight: 500; transition: all .12s; }
+.admin-nav-item:hover { background: rgba(255,255,255,0.08); color: white; }
+.admin-nav-item.active { background: rgba(90,157,110,0.2); color: #8bc9a0; font-weight: 600; }
+.admin-nav-icon { font-size: 18px; width: 24px; text-align: center; }
+.admin-sidebar-footer { padding: 16px 14px; border-top: 1px solid rgba(255,255,255,0.1); }
+.admin-user { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.admin-avatar { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: rgba(255,255,255,0.1); }
+.admin-user-info { min-width: 0; }
+.admin-user-name { font-size: 12.5px; font-weight: 600; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-user-role { font-size: 10.5px; color: rgba(255,255,255,0.5); }
+.admin-back-link { font-size: 12px; color: rgba(255,255,255,0.45); text-decoration: none; display: block; padding: 4px 0; }
+.admin-back-link:hover { color: white; }
+
+/* ===== Main content area ===== */
+.admin-main { margin-left: 240px; flex: 1; min-height: 100vh; padding: 32px 36px; max-width: calc(100vw - 240px); }
+
+/* ===== Page header ===== */
+.admin-page { max-width: 1100px; }
+.admin-page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 24px; }
+.admin-page-head h1 { font-family: "Zen Maru Gothic", system-ui, sans-serif; font-weight: 700; font-size: 26px; color: #2a2317; margin: 0; }
+.admin-page-desc { font-size: 13px; color: #7a6e58; margin: 4px 0 0; }
+.admin-crumb { font-size: 12.5px; color: #7a6e58; margin-bottom: 6px; }
+.admin-crumb a { color: #3e7a52; text-decoration: none; }
+.admin-crumb .sep { margin: 0 4px; }
+
+/* ===== Search bar ===== */
+.admin-search-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+.admin-search-bar .admin-input { min-width: 200px; }
+
+/* ===== Form elements ===== */
+.admin-input { padding: 9px 14px; border: 1.5px solid rgba(60,45,20,0.15); border-radius: 10px; background: white; font-family: inherit; font-size: 13.5px; color: #2a2317; outline: none; transition: border-color .12s; }
+.admin-input:focus { border-color: #5a9d6e; }
+.admin-input-sm { min-width: auto; width: auto; }
+.admin-textarea { resize: vertical; min-height: 80px; }
+.admin-textarea-lg { min-height: 240px; font-family: "JetBrains Mono", "Roboto Mono", ui-monospace, monospace; font-size: 13px; }
+select.admin-input { min-width: 160px; cursor: pointer; }
+
+/* ===== Buttons ===== */
+.admin-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 999px; border: 1.5px solid rgba(60,45,20,0.15); background: white; font-family: "Zen Maru Gothic", system-ui, sans-serif; font-size: 12.5px; font-weight: 600; color: #2a2317; cursor: pointer; text-decoration: none; transition: all .12s; white-space: nowrap; }
+.admin-btn:hover { background: #f0e7d2; }
+.admin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.admin-btn-primary { background: #2a2317; color: white; border-color: #2a2317; }
+.admin-btn-primary:hover { background: #5a9d6e; border-color: #5a9d6e; }
+.admin-btn-sm { padding: 5px 12px; font-size: 11.5px; }
+.admin-btn-danger { color: #d96570; border-color: rgba(217,101,112,0.3); }
+.admin-btn-danger:hover { background: #fbe3e6; }
+
+/* ===== Table ===== */
+.admin-table-wrap { background: white; border: 1px solid rgba(60,45,20,0.1); border-radius: 16px; overflow: hidden; }
+.admin-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.admin-table th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: #7a6e58; background: #fcf8ee; border-bottom: 1px solid rgba(60,45,20,0.08); }
+.admin-table td { padding: 12px 16px; border-bottom: 1px solid rgba(60,45,20,0.06); color: #4a4030; }
+.admin-table tr:last-child td { border-bottom: none; }
+.admin-table tr:hover td { background: rgba(90,157,110,0.03); }
+.admin-cell-id { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #7a6e58; width: 50px; }
+.admin-cell-title { font-weight: 600; max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.admin-cell-date { font-family: "JetBrains Mono", monospace; font-size: 11.5px; color: #7a6e58; white-space: nowrap; }
+.admin-actions { display: flex; gap: 4px; }
+
+/* ===== Difficulty badges ===== */
+.admin-diff-lv { font-size: 10.5px; padding: 2px 7px; border-radius: 999px; font-weight: 600; }
+.admin-diff-lv.l1 { background: #d8ead9; color: #3e7a52; }
+.admin-diff-lv.l2 { background: #f5dcc8; color: #d97548; }
+.admin-diff-lv.l3 { background: #fbe3e6; color: #d96570; }
+
+.admin-type-badge { font-size: 10.5px; padding: 2px 7px; border-radius: 4px; background: #e8f0fb; color: #3b82f6; font-weight: 600; }
+
+/* ===== Pagination ===== */
+.admin-pagination { display: flex; align-items: center; justify-content: center; gap: 12px; margin-top: 20px; }
+.admin-page-info { font-size: 13px; color: #7a6e58; }
+
+/* ===== Loading / Empty / Error states ===== */
+.admin-loading { text-align: center; padding: 60px; color: #7a6e58; font-size: 14px; }
+.admin-empty { text-align: center; padding: 60px; color: #7a6e58; }
+.admin-empty-icon { font-size: 48px; margin-bottom: 12px; }
+.admin-empty p { font-size: 15px; margin: 0 0 16px; }
+.admin-error { background: #fbe3e6; border: 1px solid rgba(217,101,112,0.3); border-radius: 12px; padding: 12px 16px; font-size: 13px; color: #d96570; margin-bottom: 16px; }
+
+/* ===== Form ===== */
+.admin-form { display: flex; flex-direction: column; gap: 20px; }
+.admin-form-card { background: white; border: 1px solid rgba(60,45,20,0.1); border-radius: 16px; padding: 24px; }
+.admin-form-card h3 { font-family: "Zen Maru Gothic", system-ui, sans-serif; font-size: 15px; font-weight: 700; color: #2a2317; margin: 0 0 16px; padding-bottom: 12px; border-bottom: 1px dashed rgba(60,45,20,0.1); }
+.admin-form-group { margin-bottom: 16px; }
+.admin-form-group:last-child { margin-bottom: 0; }
+.admin-form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.admin-label { display: block; font-size: 12px; font-weight: 700; color: #4a4030; margin-bottom: 6px; }
+.admin-required { color: #d96570; }
+.admin-form .admin-input { width: 100%; }
+.admin-form-actions { display: flex; gap: 8px; justify-content: flex-end; padding-top: 4px; }
+
+/* ===== Modal ===== */
+.admin-overlay { position: fixed; inset: 0; background: rgba(42,35,23,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; }
+.admin-modal { background: white; border-radius: 20px; padding: 28px 32px; max-width: 420px; width: 90%; box-shadow: 0 20px 60px rgba(42,35,23,0.3); }
+.admin-modal h3 { font-family: "Zen Maru Gothic", system-ui, sans-serif; font-size: 18px; font-weight: 700; color: #2a2317; margin: 0 0 8px; }
+.admin-modal p { font-size: 13px; color: #7a6e58; margin: 0 0 20px; line-height: 1.7; }
+.admin-modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.admin-modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.admin-modal-body { max-height: 70vh; overflow-y: auto; }
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .admin-sidebar { width: 60px; }
+  .admin-sidebar-head { padding: 16px 10px; justify-content: center; }
+  .admin-logo { display: none; }
+  .admin-badge { display: none; }
+  .admin-nav-item { justify-content: center; padding: 12px; }
+  .admin-nav-icon { margin: 0; }
+  .admin-nav-item span:last-child { display: none; }
+  .admin-sidebar-footer { display: none; }
+  .admin-main { margin-left: 60px; padding: 20px 16px; max-width: calc(100vw - 60px); }
+  .admin-page-head { flex-direction: column; }
+  .admin-table-wrap { overflow-x: auto; }
+}
+
+/* ===== HtmlEditor ===== */
+.html-editor { margin-bottom: 8px; border-radius: var(--r-md); overflow: hidden; }
+.html-editor .ql-container { font-family: "Noto Sans JP", system-ui, sans-serif; font-size: 14px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; border-color: rgba(60,45,20,0.15); }
+.html-editor .ql-toolbar { border-top-left-radius: 10px; border-top-right-radius: 10px; border-color: rgba(60,45,20,0.15); background: #fcf8ee; }
+.html-editor .ql-editor { min-height: 340px; line-height: 1.85; padding: 14px 16px; }
+
+/* ソースコードエディター（ダークテーマ） */
+.html-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 1px #7aa2f7; }
+.html-editor textarea::placeholder { color: #565f89; }
+
+/* 吹き出し挿入ボタンホバー */
+.html-editor button[dialogBtnLightStyle]:hover {
+  background: var(--accent-soft) !important;
+  border-color: var(--accent) !important;
+}

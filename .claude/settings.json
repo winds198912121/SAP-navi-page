@@ -1,0 +1,19 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "sk-aa39ee878cd34c6cab463906e0784e92",
+    "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
+    "ANTHROPIC_MODEL": "deepseek-chat",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-reasoner",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "deepseek-chat",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "deepseek-chat",
+    "CLAUDE_CODE_SUBAGENT_MODEL": "deepseek-chat",
+    "CLAUDE_CODE_MAX_OUTPUT_TOKENS": "32000"
+  },
+  "permissions": {
+    "allow": [],
+    "deny": []
+  },
+  "model": "sonnet",
+  "alwaysThinkingEnabled": true,
+  "theme": "auto"
+}

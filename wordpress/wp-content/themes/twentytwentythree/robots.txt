@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sap-panda.com/sitemap.xml
+
+# 管理画面・認証ページ
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /membership
+
+# 管理画面（WordPress）
+Disallow: /wp-admin
+Disallow: /wp-login.php
+
+# 内部API
+Disallow: /wp-json/sap/v1/auth/
+
+# テンポラリファイル
+Disallow: /*.tmp$
+Disallow: /*.bak$

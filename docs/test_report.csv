@@ -1,0 +1,52 @@
+测试项,端点,HTTP状态,结果,详情
+Register,POST /auth/register,201,PASS,"{""success"": true, ""data"": {""user_id"": 7, ""message"": ""\u767b\u9332\u304c\u5b8c\u4"
+Validate Token,POST /auth/validate,200,PASS,"{""success"": true, ""data"": {""valid"": true, ""user_id"": 1}}"
+Articles List,GET /articles,200,PASS,"{""success"": true, ""data"": [{""id"": 952, ""title"": ""S/4HANA \u5c0e\u5165\u30d7\u30e"
+Article Search,GET /articles/search?q=SAP,200,PASS,"{""success"": true, ""data"": [{""id"": 951, ""title"": ""SAP Business Technology Platfor"
+Article Popular,GET /articles/popular,200,PASS,"{""success"": true, ""data"": [{""id"": 952, ""title"": ""S/4HANA \u5c0e\u5165\u30d7\u30e"
+Article Detail,GET /articles/1,200,PASS,"{""success"": true, ""data"": {""id"": 1, ""title"": ""Hello world!"", ""slug"": ""hello-worl"
+Modules List,GET /modules,200,PASS,"{""success"": true, ""data"": [{""slug"": ""fi"", ""code"": ""FI"", ""name_ja"": ""FI \u00b7 \u"
+Module Content,GET /modules/fi/content,200,PASS,"{""success"": true, ""data"": {""module"": {""slug"": ""fi"", ""name_ja"": ""FI \u00b7 \u8ca1"
+Module Articles,GET /modules/co/articles,200,PASS,"{""success"": true, ""data"": [{""id"": 632, ""title"": ""\u539f\u4fa1\u8a08\u7b97\u3068\"
+Courses List,GET /courses,200,PASS,"{""success"": true, ""data"": [{""id"": 1087, ""title"": ""SuccessFactors \u904b\u7528\u7"
+Course Detail,GET /courses/1108,404,FAIL,Not found
+Course Lessons,GET /courses/1108/lessons,200,PASS,"{""success"": true, ""data"": []}"
+Lessons List,GET /lessons,200,PASS,"{""success"": true, ""data"": [{""id"": 1108, ""title"": ""ABAP \u00b7 \u958b\u767a\u8a00"
+Lesson Detail,GET /lessons/2530,404,FAIL,Not found
+Knowledge List,GET /knowledge,200,PASS,"{""success"": true, ""data"": [{""id"": 1107, ""title"": ""PDI\uff08Payroll Data Integrat"
+Knowledge Detail,GET /knowledge/1107,200,PASS,"{""success"": true, ""data"": {""id"": 1107, ""title"": ""PDI\uff08Payroll Data Integrati"
+Paths List,GET /learning-paths,200,PASS,"{""success"": true, ""data"": [{""id"": 965, ""title"": ""SAP\u3063\u3066\u4f55\uff1f\u30"
+Path Detail,GET /learning-paths/965,200,PASS,"{""success"": true, ""data"": {""id"": 965, ""title"": ""SAP\u3063\u3066\u4f55\uff1f\u304"
+Steps List,GET /steps,200,PASS,"{""success"": true, ""data"": [{""id"": 978, ""title"": ""SAP\u306e\u4e16\u754c\u89b3\u30"
+Path Steps,GET /learning-paths/965/steps,200,PASS,"{""success"": true, ""data"": [{""id"": 978, ""title"": ""SAP\u306e\u4e16\u754c\u89b3\u30"
+Today Quiz,GET /quizzes/today,200,PASS,"{""success"": true, ""data"": {""id"": 2412, ""question"": ""MM \u3067\u8cfc\u8cb7\u4f9d\"
+Quiz Stats,GET /quizzes/stats,200,PASS,"{""success"": true, ""data"": {""total_answers"": 31, ""correct_count"": 4, ""accuracy"": "
+Submit Answer,POST /quizzes/1/answer,404,FAIL,Not found
+Videos List,GET /videos,200,PASS,"{""success"": true, ""data"": [{""id"": 2529, ""title"": ""PP \u304b\u3093\u3070\u3093\u6"
+Video Detail,GET /videos/2529,200,PASS,"{""success"": true, ""data"": {""id"": 2529, ""title"": ""PP \u304b\u3093\u3070\u3093\u65"
+Cases List,GET /cases,200,PASS,"{""success"": true, ""data"": [{""id"": 2448, ""title"": ""PP \u751f\u7523\u8a08\u753b\u6"
+Case Detail,GET /cases/2448,200,PASS,"{""success"": true, ""data"": {""id"": 2448, ""title"": ""PP \u751f\u7523\u8a08\u753b\u67"
+Get Me,GET /users/me,200,PASS,"{""success"": true, ""data"": {""id"": 1, ""email"": ""admin@panda-sensei.com"", ""display_"
+Update Me,PUT /users/me,200,PASS,"{""success"": true, ""data"": {""id"": 1, ""email"": ""admin@panda-sensei.com"", ""display_"
+Bookmarks,GET /users/me/bookmarks,200,PASS,"{""success"": true, ""data"": []}"
+Users List,GET /users,200,PASS,"{""success"": true, ""data"": [{""id"": 1, ""email"": ""admin@panda-sensei.com"", ""display"
+Get Points,GET /points,200,PASS,"{""success"": true, ""data"": {""total"": 110, ""history"": [{""points"": ""10"", ""points_ty"
+Claim Daily,POST /points/daily,200,PASS,"{""success"": true, ""data"": {""points"": 10}}"
+Pages List,GET /pages,200,PASS,"{""success"": true, ""data"": [{""id"": 2536, ""title"": ""\u304a\u554f\u3044\u5408\u308f"
+Page by Slug,GET /pages?slug=privacy,200,PASS,"{""success"": true, ""data"": {""id"": 2533, ""title"": ""\u30d7\u30e9\u30a4\u30d0\u30b7\"
+Plans List,GET /membership/plans,200,PASS,"{""success"": true, ""data"": [{""id"": 13, ""name"": ""\u30d9\u30fc\u30b7\u30c3\u30af"", "
+Submit Contact,POST /contact,200,PASS,お問い合わせを受け付けました。確認メールをお送りいたします。
+Inquiries List,GET /contact/inquiries,200,PASS,"{""success"": true, ""data"": [{""id"": 2560, ""name"": ""[Test] test msg"", ""email"": ""tes"
+Inquiry Detail,GET /contact/inquiries/2559,200,PASS,"{""success"": true, ""data"": {""id"": 2559, ""name"": ""[TestUser] API test message"", ""n"
+Update Inquiry,PUT /contact/inquiries/2559,200,PASS,"{""success"": true}"
+Stats,GET /admin/stats,200,PASS,"{""success"": true, ""data"": {""counts"": {""articles"": 362, ""courses"": 110, ""knowledg"
+Plugins,GET /admin/plugins,200,PASS,"{""success"": true, ""data"": [{""file"": ""sap-panda-api/sap-panda-api.php"", ""name"": """
+SEO Get,GET /admin/seo-settings,200,PASS,"{""success"": true, ""data"": {""site_name"": ""SAP Panda Test"", ""geo_enabled"": true, """
+SEO Save,PUT /admin/seo-settings,200,PASS,SEO設定を保存しました。
+FAQ List,GET /admin/faq-schemas,200,PASS,"{""success"": true, ""data"": [{""id"": 1, ""question"": ""SAP\u3068\u306f\uff1f"", ""answe"
+FAQ Create,POST /admin/faq-schemas,200,PASS,"{""success"": true, ""data"": [{""id"": 1, ""question"": ""SAP\u3068\u306f\uff1f"", ""answe"
+Keywords Get,GET /admin/seo-keywords,200,PASS,"{""success"": true, ""data"": []}"
+Keyword Add,POST /admin/seo-keywords,200,PASS,"{""success"": true, ""data"": [""SAP\u6d4b\u8bd5""]}"
+Plugin Activate,POST /admin/plugins/activate,200,PASS,プラグインを有効化しました。
+Plugin Deactivate,POST /admin/plugins/deactivate,200,PASS,プラグインを無効化しました。
+Sitemap,GET /sitemap,200,PASS,139697 bytes

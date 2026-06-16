@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <!-- Background glow -->
+  <circle cx="100" cy="100" r="88" fill="#e8f0fb" opacity="0.35" />
+
+  <!-- Left ear -->
+  <g>
+    <ellipse cx="38" cy="42" rx="22" ry="20" fill="#1a1612" />
+    <ellipse cx="38" cy="44" rx="10" ry="8" fill="#3a2e22" />
+  </g>
+  <!-- Right ear -->
+  <g>
+    <ellipse cx="162" cy="42" rx="22" ry="20" fill="#1a1612" />
+    <ellipse cx="162" cy="44" rx="10" ry="8" fill="#3a2e22" />
+  </g>
+
+  <!-- Face shape -->
+  <path d="M 100 22 C 48 22 18 54 18 98 C 18 140 42 174 100 174 C 158 174 182 140 182 98 C 182 54 152 22 100 22 Z" fill="#fdfaf2" />
+
+  <!-- Left eye patch -->
+  <path d="M 38 72 C 42 58 60 58 72 62 C 84 66 86 82 84 96 C 82 110 70 118 58 118 C 46 118 32 112 28 98 C 24 86 34 82 38 72 Z" fill="#1a1612" />
+  <!-- Right eye patch -->
+  <path d="M 162 72 C 158 58 140 58 128 62 C 116 66 114 82 116 96 C 118 110 130 118 142 118 C 154 118 168 112 172 98 C 176 86 166 82 162 72 Z" fill="#1a1612" />
+
+  <!-- Left eye -->
+  <circle cx="62" cy="88" r="7.5" fill="#ffffff" />
+  <circle cx="62" cy="88" r="5" fill="#0e0a05" />
+  <circle cx="60" cy="85.5" r="2" fill="#ffffff" />
+  <!-- Right eye -->
+  <circle cx="138" cy="88" r="7.5" fill="#ffffff" />
+  <circle cx="138" cy="88" r="5" fill="#0e0a05" />
+  <circle cx="136" cy="85.5" r="2" fill="#ffffff" />
+
+  <!-- Blush -->
+  <ellipse cx="38" cy="126" rx="11" ry="6" fill="#f4b8c4" opacity="0.55" />
+  <ellipse cx="162" cy="126" rx="11" ry="6" fill="#f4b8c4" opacity="0.55" />
+
+  <!-- Nose -->
+  <ellipse cx="100" cy="118" rx="7.5" ry="5.5" fill="#1a1612" />
+
+  <!-- Mouth - happy smile -->
+  <path d="M 100 122.5 L 100 128" stroke="#1a1612" stroke-width="2.8" stroke-linecap="round" />
+  <path d="M 86 134 C 90 142 110 142 114 134" fill="none" stroke="#1a1612" stroke-width="3.5" stroke-linecap="round" />
+
+  <!-- Graduation cap -->
+  <g>
+    <!-- Cap top (quadrilateral) -->
+    <path d="M 44 80 L 100 52 L 156 80 L 100 108 Z" fill="#2a2317" />
+    <!-- Cap brim curve -->
+    <path d="M 40 84 L 40 100 C 40 112 70 126 100 126 C 130 126 160 112 160 100 L 160 84" fill="none" stroke="#2a2317" stroke-width="4.5" stroke-linecap="round" />
+    <!-- Tassel base -->
+    <rect x="92" y="108" width="16" height="10" rx="3" fill="#d97548" />
+    <!-- Tassel string -->
+    <line x1="100" y1="118" x2="100" y2="130" stroke="#d97548" stroke-width="2.5" stroke-linecap="round" />
+    <!-- Tassel end -->
+    <circle cx="100" cy="132" r="3" fill="#d97548" />
+  </g>
+
+  <!-- Word bubble with question mark -->
+  <g transform="translate(126, 8)">
+    <path d="M 0 0 C 0 -8 10 -12 22 -12 L 48 -12 C 58 -12 60 -8 60 0 L 60 18 C 60 26 58 28 48 28 L 24 28 L 12 38 L 16 28 L 12 28 C 4 28 0 26 0 18 Z" fill="#ffffff" stroke="#d8ead9" stroke-width="1.8" stroke-linecap="round" />
+    <text x="30" y="14" font-size="16" fill="#5a9d6e" text-anchor="middle" font-family="serif" font-weight="bold">?</text>
+  </g>
+
+  <!-- Floating question marks -->
+  <text x="172" y="48" font-size="26" fill="#d97548" opacity="0.5" font-family="serif" font-weight="bold">?</text>
+  <text x="18" y="168" font-size="20" fill="#5a9d6e" opacity="0.4" font-family="serif" font-weight="bold">?</text>
+</svg>

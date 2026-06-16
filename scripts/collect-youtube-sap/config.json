@@ -1,0 +1,119 @@
+{
+  "modules": {
+    "fi": {
+      "code": "FI",
+      "name": "財務会計",
+      "keywords": ["fi", "fico", "財務会計", "会計", "決算", "勘定科目", "売掛金", "買掛金", "固定資産", "連結会計", "税務"],
+      "queries": [
+        "SAP FI 財務会計",
+        "SAP FI 会計伝票 決算",
+        "SAP FICO 入門",
+        "SAP 会計 基礎 トレーニング",
+        "SAP FI 実践 テクニック"
+      ]
+    },
+    "co": {
+      "code": "CO",
+      "name": "管理会計",
+      "keywords": ["co", "管理会計", "原価管理", "原価センタ", "内部受注", "製品原価", "利益センタ", "配賦", "差異分析"],
+      "queries": [
+        "SAP CO 管理会計",
+        "SAP 原価管理",
+        "SAP CO 原価センタ",
+        "SAP 管理会計 実務",
+        "SAP CO チュートリアル"
+      ]
+    },
+    "mm": {
+      "code": "MM",
+      "name": "購買管理",
+      "keywords": ["mm", "購買", "在庫管理", "購買発注", "請求書照合", "品目マスタ", "棚卸", "外部調達", "在庫評価", "購買管理"],
+      "queries": [
+        "SAP MM 購買管理",
+        "SAP 在庫管理",
+        "SAP MM 購買発注",
+        "SAP 購買 入門 基礎",
+        "SAP MM 実践 購買"
+      ]
+    },
+    "sd": {
+      "code": "SD",
+      "name": "販売管理",
+      "keywords": ["sd", "販売管理", "受注", "出荷", "請求書", "価格設定", "得意先", "売上", "販売", "配送"],
+      "queries": [
+        "SAP SD 販売管理",
+        "SAP 受注管理 出荷",
+        "SAP SD 価格設定",
+        "SAP 販売 実務",
+        "SAP SD 請求 処理"
+      ]
+    },
+    "pp": {
+      "code": "PP",
+      "name": "生産計画",
+      "keywords": ["pp", "生産管理", "生産計画", "mrp", "bom", "工順", "製造指図", "かんばん", "部品表", "生産"],
+      "queries": [
+        "SAP PP 生産管理",
+        "SAP MRP 生産計画",
+        "SAP PP BOM 工順",
+        "SAP PP 製造指図",
+        "SAP 生産管理 MRP"
+      ]
+    },
+    "hr": {
+      "code": "HR",
+      "name": "人事管理",
+      "keywords": ["hr", "人事管理", "給与", "successfactors", "人材開発", "勤怠", "採用", "組織管理", "人事"],
+      "queries": [
+        "SAP HR 人事管理",
+        "SAP 給与管理",
+        "SAP SuccessFactors",
+        "SAP HR 勤怠管理",
+        "SAP 人事 給与 実務"
+      ]
+    },
+    "abap": {
+      "code": "ABAP",
+      "name": "ABAP開発",
+      "keywords": ["abap", "プログラミング", "開発", "cds view", "alv", "クラス", "インターフェース", "レポート", "abap"],
+      "queries": [
+        "ABAP プログラミング 入門",
+        "SAP ABAP 開発",
+        "ABAP ALV レポート",
+        "SAP ABAP 中級 応用",
+        "ABAP CDS View Fiori"
+      ]
+    },
+    "basis": {
+      "code": "BASIS",
+      "name": "基盤管理",
+      "keywords": ["basis", "ベーシス", "システム管理", "トランスポート", "権限管理", "パフォーマンス", "バックアップ", "監視", "運用管理"],
+      "queries": [
+        "SAP Basis システム管理",
+        "SAP トランスポート管理",
+        "SAP 権限管理 ロール",
+        "SAP パフォーマンス チューニング",
+        "SAP Basis 運用 管理"
+      ]
+    },
+    "s4": {
+      "code": "S4",
+      "name": "S/4HANA",
+      "keywords": ["s/4hana", "s4hana", "fiori", "btp", "sap s/4", "universal journal", "clean core", "s/4hana", "s4"],
+      "queries": [
+        "SAP S/4HANA 入門",
+        "SAP S/4HANA 移行",
+        "SAP Fiori アプリ",
+        "SAP BTP",
+        "S/4HANA 最新 機能"
+      ]
+    }
+  },
+  "settings": {
+    "max_videos_per_module": 300,
+    "min_videos_per_module": 200,
+    "max_pages_per_query": 5,
+    "results_per_page": 50,
+    "target_total": 2200
+  }
+}

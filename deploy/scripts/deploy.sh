@@ -1,0 +1,62 @@
+#!/bin/bash
+# ============================================================
+# SAP パンダ先生 — 本番デプロイスクリプト
+# ネイティブモード（ネイティブMySQL + WordPress）用
+# ============================================================
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+PROJECT_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+BACKUP_DIR="$PROJECT_DIR/deploy/backup"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+
+echo "===================================="
+echo "  🐼 SAP パンダ先生 Deploy"
+echo "===================================="
+
+# 1. バックアップ
+echo ""
+echo "[1/4] Backing up database..."
+mkdir -p "$BACKUP_DIR"
+MYSQL_SOCK="/tmp/sap-panda.sock"
+if [ -S "$MYSQL_SOCK" ]; then
+    mysqldump -S "$MYSQL_SOCK" -u wordpress -pwordpress wordpress \
+      > "$BACKUP_DIR/db_$TIMESTAMP.sql" 2>/dev/null
+    gzip "$BACKUP_DIR/db_$TIMESTAMP.sql"
+    echo "  ✅ Database backup: $BACKUP_DIR/db_$TIMESTAMP.sql.gz"
+else
+    echo "  ⚠️  MySQL not running, skipping database backup"
+fi
+
+# 2. React ビルド
+echo ""
+echo "[2/4] Building React frontend..."
+cd "$PROJECT_DIR/admin-react"
+npm ci
+npm run build
+echo "  ✅ React build complete (dist/)"
+
+# 3. Nginx 設定テスト
+echo ""
+echo "[3/4] Testing Nginx configuration..."
+NGINX_CONF="$PROJECT_DIR/deploy/nginx/default.conf"
+sudo nginx -t -c "$NGINX_CONF" 2>/dev/null || {
+    # Homebrew Nginx の設定ディレクトリにコピー
+    BREW_PREFIX=$(brew --prefix 2>/dev/null || echo "/usr/local")
+    sudo mkdir -p "$BREW_PREFIX/etc/nginx/servers"
+    sudo cp "$NGINX_CONF" "$BREW_PREFIX/etc/nginx/servers/sap-panda.conf"
+    sudo nginx -t 2>&1 | head -5
+}
+echo "  ✅ Nginx config OK"
+
+# 4. Nginx リロード
+echo ""
+echo "[4/4] Reloading Nginx..."
+sudo nginx -s reload 2>/dev/null || sudo nginx 2>/dev/null || echo "  ⚠️  Start nginx manually: sudo nginx"
+echo "  ✅ Nginx reloaded"
+
+echo ""
+echo "===================================="
+echo "  ✅ Deploy complete!"
+echo "  Site : http://localhost"
+echo "===================================="

@@ -1,0 +1,66 @@
+/*
+Theme Name: SAP パンダ先生 Child
+Theme URI: https://panda-sensei.com
+Template: kadence
+Author: Panda Team
+Version: 1.0.0
+Description: SAP パンダ先生 - 治愈系SAP知识平台子主题
+Text Domain: panda-sensei
+*/
+
+/* Custom CSS variables are injected via JS in the React app */
+/* Base typography and Kadence overrides */
+
+.site-header {
+    backdrop-filter: blur(14px) saturate(1.05);
+    -webkit-backdrop-filter: blur(14px) saturate(1.05);
+}
+
+/* Custom block styles for panda dialog */
+.wp-block-sap-panda-dialog .dialog {
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: 14px;
+    align-items: flex-start;
+    margin: 26px 0;
+}
+
+.wp-block-sap-panda-dialog .dialog .bubble {
+    background: #ffffff;
+    border: 1.5px solid #5a9d6e;
+    border-radius: 4px 18px 18px 18px;
+    padding: 14px 18px;
+    font-size: 14.5px;
+    line-height: 1.8;
+    position: relative;
+}
+
+/* Custom block styles for callout */
+.wp-block-sap-panda-callout-box .callout-box {
+    background: linear-gradient(135deg, #d8ead9, #ffffff);
+    border: 1px solid #5a9d6e;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin: 26px 0;
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 14px;
+}
+
+/* Animation keyframes for mascot */
+@keyframes bobHero {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+}
+
+@keyframes blink {
+    0%, 96%, 100% { transform: scaleY(1); }
+    98% { transform: scaleY(0.05); }
+}
+
+/* Responsive overrides */
+@media (max-width: 1023px) {
+    .wp-block-sap-panda-dialog .dialog {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Sitemap: https://sap-panda.com/sitemap.xml
+Disallow: /admin
+Disallow: /login
+Disallow: /register
+Disallow: /profile
+Disallow: /wp-admin
+Disallow: /wp-json/sap/v1/auth/

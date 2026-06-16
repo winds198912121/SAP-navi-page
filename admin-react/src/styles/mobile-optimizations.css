@@ -1,0 +1,449 @@
+/* ============================================================
+   SAP パンダ先生 — モバイル完全最適化
+   スマートフォン (～639px) / タブレット (～1023px) 対応
+   ============================================================ */
+
+/* ===== モバイルメニューボタン ===== */
+.mobile-menu-btn { display: none; }
+@media (max-width: 1023px) {
+  .mobile-menu-btn { display: flex !important; }
+}
+
+/* ===== 0. ベース設定 ===== */
+@media (max-width: 1023px) {
+  html { font-size: 14px; }
+}
+@media (max-width: 639px) {
+  html { font-size: 13px; }
+}
+
+/* ===== 1. タッチデバイスで hover 無効化（省電力） ===== */
+@media (hover: none) and (pointer: coarse) {
+  .btn:hover, .mod-card:hover, .mod-card:hover .mod-icon,
+  .path-card:hover, .art-card:hover, .article-row:hover,
+  .case-card:hover, .ticker-pill:hover, .top10-item:hover,
+  .filter-item:hover, .apply-chip:hover, .match-chip:hover,
+  .path-step:hover, .nav-link:hover { transform: none !important; background: inherit; box-shadow: none; }
+  .mod-card { transition: none; }
+  .float-panda:hover { transform: none; }
+}
+
+/* ===== 2. backdrop-filter 負荷軽減 ===== */
+@media (max-width: 1023px) {
+  .site-header {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 250, 240, 0.97) !important;
+  }
+}
+
+/* ===== 3. 背景パターン軽量化 ===== */
+@media (max-width: 1023px) {
+  .page-bg {
+    background: var(--bg-0) !important;
+    opacity: 1 !important;
+  }
+  .page-bg::before { display: none !important; }
+}
+
+/* ===== 4. 全アニメーション停止（モバイル） ===== */
+@media (max-width: 1023px) {
+  .hero-panda-wrap, .hero-student-wrap, .callout, .float-panda,
+  .eye-blink, .ear-wiggle, .hand-wave, .reveal,
+  .case-modal, .ticker-track, .bobHero, .floatY { animation: none !important; }
+  .ticker-viewport { animation: none; }
+  .ticker-track { animation: none !important; }
+  .mod-card::before { width: 3px; }
+}
+
+/* ===== 5. ヘッダー最適化 ===== */
+@media (max-width: 1023px) {
+  .nav-wrap { padding: 10px 12px; gap: 8px; }
+  .brand .logo-panda { width: 30px; height: 30px; }
+  .brand-text .brand-name { font-size: 15px; }
+  .brand-text .brand-sub { font-size: 8px; }
+  .search-pill {
+    min-width: 0; padding: 6px 10px; flex: 1; max-width: 160px;
+  }
+  .search-pill span { display: none; }
+  .search-pill .kbd { display: none; }
+  .nav-right .btn.sm.accent { font-size: 11px; padding: 5px 10px; white-space: nowrap; }
+  .nav-right { gap: 4px; }
+}
+
+/* ===== 6. ヒーロー最適化（トップページ） ===== */
+@media (max-width: 1023px) {
+  .hero {
+    grid-template-columns: 1fr; min-height: auto;
+    padding: 28px 16px 20px; gap: 0;
+  }
+  .hero-scene { display: none !important; }
+  .hero h1 { font-size: clamp(26px, 6.5vw, 34px); margin: 0 0 12px; }
+  .hero p.lead { font-size: 14px; margin: 0 0 20px; max-width: 100%; }
+  .hero-ctas { flex-direction: column; gap: 8px; }
+  .hero-ctas .btn { width: 100%; justify-content: center; }
+  .hero-stats {
+    gap: 12px; padding-top: 16px;
+    display: grid; grid-template-columns: repeat(2, 1fr);
+  }
+  .hero-stat .v { font-size: 20px; }
+  .hero-stat .l { font-size: 10.5px; }
+  .hero-eyebrow { font-size: 11px; padding: 4px 10px 4px 4px; margin-bottom: 12px; }
+}
+
+/* ===== 7. セクション ===== */
+@media (max-width: 1023px) {
+  .section { padding: 36px 16px; }
+  .section-head { flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 18px; }
+  .section-head .desc { margin-left: 0; text-align: left; max-width: 100%; font-size: 13px; }
+  .section-head h2 { font-size: 22px; }
+}
+@media (max-width: 639px) {
+  .section { padding: 28px 12px; }
+  .section-head h2 { font-size: 20px; }
+}
+
+/* ===== 8. モジュールグリッド ===== */
+@media (max-width: 1023px) {
+  .module-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+@media (max-width: 639px) {
+  .module-grid { grid-template-columns: 1fr; gap: 10px; }
+  .mod-card { padding: 16px; min-height: 140px; }
+  .mod-icon { width: 40px; height: 40px; font-size: 15px; }
+  .mod-name-ja { font-size: 15px; margin-top: 10px; }
+  .mod-desc { font-size: 12px; margin-top: 6px; }
+  .mod-foot { margin-top: 10px; padding-top: 8px; font-size: 11px; }
+}
+
+/* ===== 9. 記事一覧カード ===== */
+@media (max-width: 1023px) {
+  .card-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+}
+@media (max-width: 639px) {
+  .card-grid { grid-template-columns: 1fr; gap: 10px; }
+  .art-card .body { padding: 12px; }
+  .art-card h3 { font-size: 14px; }
+  .art-card .excerpt { display: none; }
+  .art-card .foot { font-size: 11px; margin-top: 8px; padding-top: 8px; }
+}
+
+/* ===== 10. カテゴリーページ ===== */
+@media (max-width: 1023px) {
+  .cat-hero { padding: 24px 16px 18px !important; }
+  .cat-hero-wrap { grid-template-columns: 1fr !important; align-items: start !important; }
+  .cat-hero-wrap .cat-mascot { display: none; }
+  .cat-title-row h1 { font-size: 26px; }
+  .cat-body { grid-template-columns: 1fr; padding: 20px 16px 40px; }
+  .cat-sidebar { position: relative; top: 0; display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .filter-block { padding: 12px; margin-bottom: 0; }
+  .filter-block h5 { font-size: 11px; margin-bottom: 8px; }
+  .cat-big-icon { width: 48px; height: 48px; font-size: 20px; }
+}
+@media (max-width: 639px) {
+  .cat-hero { padding: 18px 12px 14px !important; }
+  .cat-sidebar { grid-template-columns: 1fr; }
+  .filter-list { flex-direction: row; overflow-x: auto; gap: 4px; padding-bottom: 4px; }
+  .filter-item { white-space: nowrap; flex-shrink: 0; font-size: 12px; padding: 6px 10px; }
+}
+
+/* ===== 11. 記事詳細ページ ===== */
+@media (max-width: 1023px) {
+  .art-hero { padding: 24px 16px 20px; }
+  .art-hero h1 { font-size: 26px; }
+  .art-body-wrap { grid-template-columns: 1fr; padding: 16px 16px 60px; }
+  .art-side { display: none; }
+  .art-content { font-size: 14px; }
+  .art-content h2 { font-size: 20px; margin: 28px 0 12px; }
+  .dialog { grid-template-columns: 48px 1fr; gap: 10px; }
+  .dialog .bubble { font-size: 13px; padding: 10px 14px; }
+}
+@media (max-width: 639px) {
+  .art-hero h1 { font-size: 22px; }
+  .art-content { font-size: 13.5px; }
+}
+
+/* ===== 12. 学習パス ===== */
+@media (max-width: 1023px) {
+  .path-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
+/* ===== 13. 記事一覧（articles-grid） ===== */
+@media (max-width: 1023px) {
+  .articles-grid { grid-template-columns: 1fr; gap: 20px; }
+}
+@media (max-width: 639px) {
+  .article-row { grid-template-columns: 70px 1fr; gap: 10px; padding: 12px 0; }
+  .article-thumb { width: 70px; height: 52px; }
+  .article-row h3 { font-size: 13px; -webkit-line-clamp: 2; }
+  .article-row .excerpt { display: none; }
+  .article-meta-top { font-size: 10px; }
+}
+
+/* ===== 14. クイズ ===== */
+@media (max-width: 1023px) {
+  .quiz-card { grid-template-columns: 1fr; }
+  .quiz-right { display: none; }
+}
+@media (max-width: 639px) {
+  .quiz-left { padding: 20px 16px; }
+  .quiz-card h3 { font-size: 16px; }
+  .quiz-opt { font-size: 12px; padding: 10px 12px; }
+}
+
+/* ===== 15. YouTube セクション ===== */
+@media (max-width: 1023px) {
+  .yt-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .yt-section { padding: 24px 16px; }
+}
+@media (max-width: 639px) {
+  .yt-grid { grid-template-columns: 1fr; gap: 10px; }
+  .yt-intro h2 { font-size: 22px; }
+}
+
+/* ===== 16. ニュースレター ===== */
+@media (max-width: 1023px) {
+  .newsletter { grid-template-columns: 1fr; text-align: center; padding: 24px 20px; }
+  .newsletter .nl-mascot { display: none; }
+  .newsletter h3 { font-size: 18px; }
+}
+@media (max-width: 639px) {
+  .newsletter { padding: 20px 16px; }
+  .nl-form { flex-direction: column; }
+  .nl-form .btn { width: 100%; justify-content: center; }
+}
+
+/* ===== 17. フッター ===== */
+@media (max-width: 1023px) {
+  .foot-wrap { grid-template-columns: 1fr 1fr; gap: 24px; }
+}
+@media (max-width: 639px) {
+  .foot-wrap { grid-template-columns: 1fr; gap: 20px; }
+  .site-footer { padding: 32px 16px 20px; margin-top: 32px; }
+  .foot-about { font-size: 12px; }
+}
+
+/* ===== 18. ケース/案件 ===== */
+@media (max-width: 1023px) {
+  .case-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+@media (max-width: 639px) {
+  .case-card { padding: 16px; }
+  .case-title { font-size: 14px; }
+  .case-detail-grid { grid-template-columns: 1fr; }
+  .case-modal { padding: 20px 16px; margin: 8px; }
+}
+
+/* ===== 19. ケースティッカー ===== */
+@media (max-width: 1023px) {
+  .ticker-head { flex-wrap: wrap; gap: 8px; }
+  .ticker-cta { margin-left: 0; }
+}
+
+/* ===== 20. 検索ページ ===== */
+@media (max-width: 639px) {
+  .filter-block { padding: 14px; }
+  .filter-list { flex-direction: row; overflow-x: auto; gap: 6px; padding-bottom: 8px; }
+  .filter-item { white-space: nowrap; flex-shrink: 0; }
+}
+
+/* ===== 21. 用語集/トレンド/転職ガイド（TopicPage） ===== */
+@media (max-width: 1023px) {
+  .cat-title-row .cat-big-icon { width: 44px; height: 44px; font-size: 20px !important; }
+  .cat-title-row h1 { font-size: 24px !important; }
+}
+@media (max-width: 639px) {
+  .cat-title-row h1 { font-size: 20px !important; }
+}
+
+/* ===== 22. ページネーション ===== */
+@media (max-width: 639px) {
+  .pagination { gap: 4px; }
+  .pg-btn { min-width: 32px; height: 32px; font-size: 12px; }
+}
+
+/* ===== 23. 管理画面（admin）モバイル ===== */
+@media (max-width: 1023px) {
+  .admin-sidebar { width: 56px !important; }
+  .admin-sidebar-head { padding: 12px 8px !important; justify-content: center !important; }
+  .admin-logo, .admin-badge { display: none !important; }
+  .admin-nav-item { justify-content: center; padding: 10px !important; min-height: 44px; }
+  .admin-nav-icon { margin: 0 !important; }
+  .admin-nav-item span:last-child { display: none !important; }
+  .admin-sidebar-footer { display: none !important; }
+  .admin-main { margin-left: 56px !important; padding: 16px !important; max-width: calc(100vw - 56px) !important; }
+  .admin-page-head { flex-direction: column; gap: 8px; }
+  .admin-form-row { grid-template-columns: 1fr; }
+  .admin-table-wrap { overflow-x: auto; }
+  .admin-pagination { flex-direction: column; gap: 8px; }
+}
+@media (max-width: 639px) {
+  .admin-main { padding: 12px !important; }
+  .admin-page-head h1 { font-size: 20px; }
+  .admin-btn { font-size: 11px; padding: 6px 12px; }
+}
+
+/* ===== 24. 管理画面（admin）モバイル完全対応 ===== */
+@media (max-width: 1023px) {
+  .admin-sidebar { width: 56px !important; }
+  .admin-sidebar-head { padding: 12px 8px !important; justify-content: center !important; }
+  .admin-logo, .admin-badge { display: none !important; }
+  .admin-nav-item { justify-content: center; padding: 10px !important; min-height: 44px; }
+  .admin-nav-icon { margin: 0 !important; }
+  .admin-nav-item span:last-child { display: none !important; }
+  .admin-sidebar-footer { display: none !important; }
+  .admin-main { margin-left: 56px !important; padding: 16px !important; max-width: calc(100vw - 56px) !important; }
+  .admin-page-head { flex-direction: column; gap: 8px; }
+  .admin-form-row { grid-template-columns: 1fr; }
+  .admin-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .admin-pagination { flex-direction: column; gap: 8px; }
+  .admin-search-bar { flex-direction: column; }
+  .admin-search-bar .admin-input { min-width: 100%; }
+}
+@media (max-width: 639px) {
+  .admin-shell { position: relative; }
+  .admin-sidebar {
+    position: fixed !important; top: 0; left: -280px; bottom: 0; z-index: 300;
+    width: 260px !important; transition: left .25s ease; padding-top: 4px;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .admin-sidebar--open { left: 0 !important; }
+  .admin-sidebar-head { justify-content: flex-start !important; padding: 16px 16px 12px !important; }
+  .admin-logo { display: flex !important; font-size: 15px !important; }
+  .admin-badge { display: inline !important; }
+  .admin-nav-item { justify-content: flex-start; padding: 10px 14px !important; }
+  .admin-nav-item span:last-child { display: inline !important; }
+  .admin-sidebar-footer { display: block !important; }
+  .admin-main { margin-left: 0 !important; padding: 12px !important; max-width: 100% !important; }
+  .admin-page-head h1 { font-size: 20px; }
+  .admin-page-desc { font-size: 12px; }
+  .admin-btn { font-size: 11px; padding: 6px 12px; min-height: 38px; }
+  .admin-form-card { padding: 16px; }
+  .admin-table th, .admin-table td { padding: 8px 10px; font-size: 12px; }
+  .admin-cell-title { max-width: 120px; }
+  .admin-cell-date { font-size: 10px; }
+  .admin-crumb { font-size: 11px; }
+  .admin-modal { padding: 20px 16px; width: 95%; margin: 10px; }
+  .admin-form-actions { flex-direction: column; gap: 8px; }
+  .admin-form-actions .admin-btn, .admin-form-actions button { width: 100%; justify-content: center; }
+
+  /* モバイルハンバーガーボタン */
+  .admin-mobile-toggle {
+    position: fixed !important; top: 8px; left: 8px; z-index: 310;
+    width: 40px; height: 40px; border-radius: 10px;
+    background: var(--bg-card); border: 1px solid var(--line-2);
+    display: flex !important; align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer; color: var(--ink-0);
+    box-shadow: var(--sh-1);
+  }
+  .admin-overlay {
+    position: fixed; inset: 0; z-index: 290;
+    background: rgba(0,0,0,0.4); display: block !important;
+  }
+  .admin-page { padding-top: 8px; }
+}
+@media (min-width: 640px) {
+  .admin-mobile-toggle { display: none !important; }
+  .admin-overlay { display: none !important; }
+}
+
+/* 管理画面ヘッダー（モバイル用パディング） */
+@media (max-width: 639px) {
+  .admin-page-head { padding-left: 40px; }
+}
+
+/* ===== 25. タッチターゲット最小サイズ ===== */
+@media (pointer: coarse) {
+  .nav-link, .btn, .filter-item, .quiz-opt, .admin-nav-item,
+  .ticker-pill, .apply-chip, .match-chip, .case-card,
+  .mod-card, .art-card, .path-card, .path-step,
+  .top10-item { min-height: 44px; }
+  .search-pill { min-height: 40px; }
+  .admin-btn { min-height: 40px; }
+}
+
+/* ===== 25. タッチデバイスでスクロールバー非表示 ===== */
+@media (hover: none) and (pointer: coarse) {
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  body { scrollbar-width: none; }
+}
+
+/* ===== 26. 画像/動画のはみ出し防止 ===== */
+img, video, iframe, svg { max-width: 100%; height: auto; }
+
+/* ===== 27. モーダル最適化 ===== */
+@media (max-width: 639px) {
+  .case-modal-overlay { padding: 8px; align-items: flex-end; }
+  .case-modal { border-radius: var(--r-xl) var(--r-xl) 0 0; max-height: 90vh; margin-bottom: 0; }
+  .apply-row { grid-template-columns: 1fr; }
+}
+
+/* ===== 28. プロフィールページ最適化 ===== */
+@media (max-width: 639px) {
+  .match-bar { flex-direction: column; gap: 12px; align-items: stretch; }
+  .match-chips { justify-content: center; }
+}
+
+/* ===== 29. フロートパンダ最適化 ===== */
+@media (max-width: 639px) {
+  .float-panda { width: 48px; height: 48px; bottom: 12px; right: 12px; }
+}
+
+/* ===== 30. Adjust panel 最適化 ===== */
+@media (max-width: 1023px) {
+  .tweaks-btn { bottom: 12px; right: 12px; width: 44px; height: 44px; font-size: 18px; }
+  .tweaks-panel { right: 8px; bottom: 64px; min-width: 180px; }
+}
+
+/* ===== 31. YT 動画詳細ページの最適化 ===== */
+@media (max-width: 639px) {
+  .yt-videos { grid-template-columns: 1fr; }
+}
+
+/* ===== 32. パンくずリスト最適化 ===== */
+@media (max-width: 639px) {
+  .crumb { font-size: 11px !important; flex-wrap: wrap; gap: 4px; }
+  .crumb a, .crumb span { white-space: nowrap; }
+}
+
+/* ===== 33. Worries セクション最適化 ===== */
+@media (max-width: 639px) {
+  .worries-grid { grid-template-columns: 1fr; gap: 12px; }
+  .worries-cta { flex-direction: column; text-align: center; padding: 24px 20px; }
+}
+
+/* ===== 34. 各種トップ10 ===== */
+@media (max-width: 639px) {
+  .top10 { padding: 14px 16px; }
+  .top10-item { padding: 8px 0; }
+  .rank-num { font-size: 18px; width: 22px; }
+  .top10-item h4 { font-size: 12px; }
+}
+
+/* ===== 35. ケース応募フォーム最適化 ===== */
+@media (max-width: 639px) {
+  .case-detail-grid { grid-template-columns: 1fr; gap: 8px; }
+}
+
+/* ===== 36. 管理画面テーブル: 最終列（操作）を常に表示 ===== */
+.admin-table-wrap { position: relative; }
+
+/* 操作列（最終セル）を sticky で常に表示 */
+.admin-table td:last-child, .admin-table th:last-child {
+  position: sticky; right: 0; z-index: 1;
+  background: inherit;
+}
+.admin-table th:last-child { background: #fcf8ee; }
+.admin-table td:last-child .admin-actions { gap: 2px; flex-wrap: nowrap; }
+.admin-table td:last-child .admin-btn {
+  font-size: 11px; padding: 4px 10px; white-space: nowrap;
+}
+
+/* タブレット以下: 列の表示数調整（col-xxx class で個別制御） */
+@media (max-width: 1023px) {
+  .col-hide-tablet { display: none !important; }
+}
+@media (max-width: 639px) {
+  .col-hide-mobile { display: none !important; }
+}
