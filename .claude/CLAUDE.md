@@ -252,9 +252,21 @@ QA Agent
 ↓
 Review Agent
 ↓
+**Docs Agent（必须在 Review 之后、Deploy 之前生成/更新所有文档）**
+↓
 deploy Agent
 
 严格按照顺序执行。
+
+**注意：** Docs Agent 工作内容包括更新 `docs/features/`、`docs/project-status.md`、`docs/api_list.csv`、`docs/database/` 等。
+
+---
+
+## 文档维护原则
+
+- **代码与文档同步** — 不允许先写代码后补文档，两者必须在同一交付批次中完成
+- **存量文档更新** — 修改已有功能时，必须检查并更新相关存量文档，而非只写新文档
+- **文档即代码** — 文档与代码同等重要，Review Agent 须检查文档完整性
 
 ---
 
@@ -277,6 +289,20 @@ deploy Agent
 ---
 
 ## 文档规范
+
+### 强制性要求
+
+所有新增功能点、模块、API端点等**必须同步写入相应文档**，禁止只写代码不写文档。
+
+凡新增或修改功能，必须同时更新（至少一项）：
+
+1. **功能说明文档** → `docs/features/<feature-name>.md`
+2. **API文档** → `docs/api_list.csv`（新增/变更端点时）
+3. **数据库变更** → `docs/database/`（表结构变更时）
+4. **项目状态报告** → `docs/project-status.md`（完成度/进度更新）
+5. **需求/功能清单** → `docs/feature_list.csv`
+
+### 功能文档规范
 
 所有功能必须生成：
 

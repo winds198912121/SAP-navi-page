@@ -2,7 +2,7 @@
 /**
  * Plugin Name: SAP Panda API
  * Description: Custom REST API, CPTs, Taxonomies, and ACF fields for SAP Panda Academy
- * Version:     1.0.0
+ * Version:     2.0.0
  * Author:      Panda Team
  * Text Domain: sap-panda
  *

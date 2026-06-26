@@ -5,6 +5,7 @@ Thumbs.db
 *.swo
 
 # IDE
+.claude/
 .idea/
 .vscode/
 *.sublime-*
@@ -24,6 +25,8 @@ __pycache__/
 *.pyo
 .env
 venv/
+deply/
+tests/
 .venv/
 
 # Docker
@@ -32,3 +35,4 @@ venv/
 # Project specific
 scripts/*.json
 *.log
+test-results/

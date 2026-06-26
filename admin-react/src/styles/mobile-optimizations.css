@@ -215,14 +215,7 @@
 }
 
 /* ===== 17. フッター ===== */
-@media (max-width: 1023px) {
-  .foot-wrap { grid-template-columns: 1fr 1fr; gap: 24px; }
-}
-@media (max-width: 639px) {
-  .foot-wrap { grid-template-columns: 1fr; gap: 20px; }
-  .site-footer { padding: 32px 16px 20px; margin-top: 32px; }
-  .foot-about { font-size: 12px; }
-}
+/* Footer mobile rules moved to index.css */
 
 /* ===== 18. ケース/案件 ===== */
 @media (max-width: 1023px) {

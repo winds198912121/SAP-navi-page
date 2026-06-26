@@ -170,7 +170,7 @@ export default function CoursePage() {
                 <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: '0 0 18px' }}>コースの各レッスンを順番に学習しましょう。</p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {paginatedLessons.map((l, i) => (
-                    <Link key={l.id} to={`/lesson/${l.id}`} style={{
+                    <Link key={l.id} to={`/lesson/${l.id}/${l.slug}`} style={{
                       display: 'flex', alignItems: 'center', gap: 14,
                       padding: '13px 18px', borderRadius: 'var(--r-lg)',
                       border: '1.5px solid var(--line-1)',

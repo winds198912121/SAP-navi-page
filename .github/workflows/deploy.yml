@@ -1,0 +1,240 @@
+# ============================================================
+# SAP Panda Academy — GitHub Actions CI/CD
+# 自动构建 → 推送镜像 → 部署到服务器
+# ============================================================
+# 触发条件:
+#   - main 分支推送时自动部署
+#   - 手动触发（workflow_dispatch）可指定标签
+#
+# 所需 Secrets:
+#   DOCKER_USERNAME          — Docker Hub 用户名
+#   DOCKER_PASSWORD          — Docker Hub 密码 / Token
+#   DEPLOY_HOST              — 部署服务器 IP/域名
+#   DEPLOY_USER              — SSH 用户名
+#   DEPLOY_SSH_KEY           — SSH 私钥（Base64 编码）
+#   DEPLOY_PATH              — 部署目录（默认 /opt/sap-panda）
+#   JWT_SECRET               — JWT 密钥
+#   DB_ROOT_PASSWORD         — MySQL root 密码
+#   DB_PASSWORD              — WordPress 数据库密码
+#   WP_HOME                  — WordPress 首页 URL（可选）
+#   WP_SITEURL               — WordPress 站点 URL（可选）
+#   SLACK_WEBHOOK            — Slack 通知 Webhook（可选）
+# ============================================================
+
+name: Deploy SAP Panda Academy
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Deploy tag (leave empty for latest)'
+        required: false
+        type: string
+
+env:
+  REGISTRY: docker.io
+  IMAGE_NAME: ${{ secrets.DOCKER_USERNAME }}/sap-panda-academy
+  DOCKER_COMPOSE_DIR: /opt/sap-panda
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ================================================================
+  # Job 1: 测试
+  # ================================================================
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: admin-react/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: admin-react
+
+      - name: TypeScript check
+        run: npx tsc --noEmit
+        working-directory: admin-react
+
+      - name: Lint check
+        run: npx eslint src/ --ext .ts,.tsx
+        working-directory: admin-react
+        continue-on-error: true
+
+      - name: Run tests
+        run: npm test -- --run
+        working-directory: admin-react
+        continue-on-error: true
+
+      - name: Build check
+        run: npm run build
+        working-directory: admin-react
+
+  # ================================================================
+  # Job 2: 构建并推送 Docker 镜像
+  # ================================================================
+  build:
+    name: Build & Push Docker Image
+    runs-on: ubuntu-latest
+    needs: [test]
+    # 手动触发时不需要等待测试
+    if: success() || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=sha,prefix={{branch}}-,format=short
+            type=ref,event=tag
+          flavor: |
+            latest=auto
+            prefix=
+            suffix=
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./admin-react
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: Image digest
+        run: echo "Pushed ${{ steps.meta.outputs.tags }}"
+
+  # ================================================================
+  # Job 3: 部署到服务器
+  # ================================================================
+  deploy:
+    name: Deploy to Production Server
+    runs-on: ubuntu-latest
+    needs: [build]
+    if: success() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH connection
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
+
+      - name: Add server to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.DEPLOY_HOST }} >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Sync docker-compose and config files
+        run: |
+          rsync -avz --delete \
+            --exclude='.git/' \
+            --exclude='node_modules/' \
+            --exclude='admin-react/src/' \
+            --exclude='admin-react/node_modules/' \
+            --exclude='admin-react/.git/' \
+            --include='docker-compose.yml' \
+            --include='.env.example' \
+            --include='deploy/nginx/nginx.conf' \
+            --include='wordpress/wp-content/plugins/' \
+            --include='wordpress/wp-content/themes/' \
+            --include='wordpress/scripts/' \
+            --include='wordpress/php.ini' \
+            --exclude='*' \
+            ./ \
+            ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}:${{ secrets.DEPLOY_PATH || env.DOCKER_COMPOSE_DIR }}/
+
+      - name: Deploy via SSH
+        run: |
+          ssh ${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }} << 'EOF'
+            set -e
+
+            # 进入部署目录
+            cd ${{ secrets.DEPLOY_PATH || env.DOCKER_COMPOSE_DIR }}
+
+            # 创建 .env 文件（如果不存在）
+            if [ ! -f .env ]; then
+              cat > .env << 'ENVEOF'
+        APP_PORT=80
+        DB_PORT=3307
+        DB_ROOT_PASSWORD=${{ secrets.DB_ROOT_PASSWORD }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        WP_HOME=${{ secrets.WP_HOME || 'http://localhost' }}
+        WP_SITEURL=${{ secrets.WP_SITEURL || 'http://localhost' }}
+        FORCE_SSL_ADMIN=${{ secrets.FORCE_SSL_ADMIN || 'false' }}
+ENVEOF
+            fi
+
+            # 拉取最新镜像并重启
+            docker compose pull app
+            docker compose up -d --build --remove-orphans
+
+            # 清理旧镜像
+            docker image prune -f
+
+            # 检查服务状态
+            echo "=== Service Status ==="
+            docker compose ps
+
+            echo "=== Health Check ==="
+            sleep 5
+            curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost/
+          EOF
+
+      - name: Send Slack notification
+        if: always() && secrets.SLACK_WEBHOOK
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "${{ job.status == 'success' && '✅' || '❌' }} SAP Panda Academy deploy ${{ job.status }}",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ job.status == 'success' && '✅' || '❌' }} *SAP Panda Academy* deploy ${{ job.status }}\n*Commit:* <${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }}|${{ github.sha.substring(0, 7) }}>\n*Branch:* ${{ github.ref_name }}"
+                  }
+                }
+              ]
+            }

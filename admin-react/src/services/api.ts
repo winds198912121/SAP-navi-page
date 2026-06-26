@@ -84,6 +84,30 @@ class ApiService {
     return data
   }
 
+  /** 学習パス詳細 */
+  async getLearningPath(id: number): Promise<ApiResponse<any>> {
+    const { data } = await this.client.get(`/learning-paths/${id}`)
+    return data
+  }
+
+  /** 学習パス作成 */
+  async createLearningPath(form: Record<string, any>): Promise<ApiResponse<any>> {
+    const { data } = await this.client.post('/learning-paths', form)
+    return data
+  }
+
+  /** 学習パス更新 */
+  async updateLearningPath(id: number, form: Record<string, any>): Promise<ApiResponse<any>> {
+    const { data } = await this.client.put(`/learning-paths/${id}`, form)
+    return data
+  }
+
+  /** 学習パス削除 */
+  async deleteLearningPath(id: number): Promise<ApiResponse<any>> {
+    const { data } = await this.client.delete(`/learning-paths/${id}`)
+    return data
+  }
+
   /** 動画一覧 */
   async getVideos(params?: Record<string, any>): Promise<ApiResponse<any>> {
     const { data } = await this.client.get('/videos', { params })
@@ -93,12 +117,6 @@ class ApiService {
   /** 動画詳細 */
   async getVideo(id: number): Promise<ApiResponse<any>> {
     const { data } = await this.client.get(`/videos/${id}`)
-    return data
-  }
-
-  /** 学習パス詳細 */
-  async getLearningPath(id: number): Promise<ApiResponse<any>> {
-    const { data } = await this.client.get(`/learning-paths/${id}`)
     return data
   }
 
@@ -147,6 +165,36 @@ class ApiService {
   /** ナレッジ削除 */
   async deleteKnowledge(id: number): Promise<ApiResponse<any>> {
     const { data: res } = await this.client.delete(`/knowledge/${id}`)
+    return res
+  }
+
+  /** 记事列表 */
+  async getNotes(params?: Record<string, any>): Promise<ApiResponse<any[]>> {
+    const { data } = await this.client.get('/notes', { params })
+    return data
+  }
+
+  /** 记事详情 */
+  async getNote(id: number): Promise<ApiResponse<any>> {
+    const { data } = await this.client.get(`/notes/${id}`)
+    return data
+  }
+
+  /** 记事作成 */
+  async createNote(form: Record<string, any>): Promise<ApiResponse<any>> {
+    const { data } = await this.client.post('/notes', form)
+    return data
+  }
+
+  /** 记事更新 */
+  async updateNote(id: number, form: Record<string, any>): Promise<ApiResponse<any>> {
+    const { data } = await this.client.put(`/notes/${id}`, form)
+    return data
+  }
+
+  /** 记事削除 */
+  async deleteNote(id: number): Promise<ApiResponse<any>> {
+    const { data: res } = await this.client.delete(`/notes/${id}`)
     return res
   }
 

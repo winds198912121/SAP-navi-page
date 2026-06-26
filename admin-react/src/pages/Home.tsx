@@ -5,7 +5,7 @@ import SiteHeader from '../components/layout/Header'
 import SiteFooter from '../components/layout/Footer'
 import FloatingPanda from '../components/layout/FloatingPanda'
 import { useTheme } from '../hooks/useTheme'
-import { SAP_MODULES, LEARNING_PATHS, ARTICLE_DATA, TOP10 } from '../types'
+import { SAP_MODULES, LEARNING_PATHS, TOP10 } from '../types'
 import CaseTicker from '../components/cases/CaseTicker'
 import CasesSection from '../components/cases/CasesSection'
 import FreelanceWorries from '../components/cases/FreelanceWorries'
@@ -179,6 +179,14 @@ function PathsSection() {
 }
 
 function ArticlesSection() {
+  const [articles, setArticles] = useState<any[]>([])
+
+  useEffect(() => {
+    api.getArticles({ per_page: 3 }).then(res => {
+      if (res.success && res.data) setArticles(res.data)
+    }).catch(() => {})
+  }, [])
+
   return (
     <section className="section" id="articles">
       <div className="section-head">
@@ -190,27 +198,37 @@ function ArticlesSection() {
       </div>
       <div className="articles-grid">
         <div className="article-list">
-          {ARTICLE_DATA.slice(0, 3).map((a, i) => (
-            <a key={i} href={`/article/${a.title.replace(/\s+/g, '-')}`} className="article-row" style={{ textDecoration: 'none', display: 'block' }}>
-              <div className="article-thumb">
-                <svg viewBox="0 0 120 88" style={{ width: '100%', height: '100%' }}>
-                  <rect width="120" height="88" fill={a.cover === 'fi' ? '#d8ead9' : a.cover === 'abap' ? '#cfecec' : a.cover === 'mm' ? '#fde0c2' : a.cover === 's4' ? '#d1ecf9' : '#e4dffb'} />
-                  <text x="60" y="48" fontSize="22" fontWeight="800" fill={a.cover === 'fi' ? '#2f6d44' : a.cover === 'abap' ? '#1f6f6f' : a.cover === 'mm' ? '#a25411' : a.cover === 's4' ? '#1864a3' : '#4828a8'} textAnchor="middle" fontFamily="monospace">{a.mod}</text>
-                </svg>
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div className="article-meta-top">
-                  <span className={`tag-mod ${a.cover}`}>{a.mod}</span>
-                  <span className={`tag-diff l${a.diff}`}>{a.diffLabel}</span>
+          {articles.length === 0 ? (
+            <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)', fontSize: 13 }}>読み込み中...</div>
+          ) : (
+            articles.map((a) => (
+              <Link key={a.id} to={`/article/${a.id}/${a.slug}`} className="article-row" style={{ textDecoration: 'none', display: 'block' }}>
+                <div className="article-thumb">
+                  <svg viewBox="0 0 120 88" style={{ width: '100%', height: '100%' }}>
+                    <rect width="120" height="88" fill={a.modules?.[0]?.slug ? 'var(--accent-soft)' : 'var(--bg-tint)'} />
+                    <text x="60" y="48" fontSize="22" fontWeight="800" fill="var(--accent-deep)" textAnchor="middle" fontFamily="monospace">
+                      {a.modules?.[0]?.slug?.toUpperCase() || '?'}
+                    </text>
+                  </svg>
                 </div>
-                <h3>{a.title}</h3>
-                <div className="excerpt">{a.excerpt}</div>
-                <div className="article-meta-bot">
-                  <span>{a.author}</span><span>·</span><span>{a.date}</span><span>·</span><span>{a.mins} min read</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="article-meta-top">
+                    {a.modules?.[0] && <span className={`tag-mod ${a.modules[0].slug}`}>{a.modules[0].slug?.toUpperCase()}</span>}
+                    {a.difficulty && (
+                      <span className={`tag-diff l${a.difficulty.slug === 'beginner' ? 1 : a.difficulty.slug === 'intermediate' ? 2 : 3}`}>
+                        {a.difficulty.slug === 'beginner' ? '初級' : a.difficulty.slug === 'intermediate' ? '中級' : '上級'}
+                      </span>
+                    )}
+                  </div>
+                  <h3>{a.title}</h3>
+                  <div className="excerpt">{a.excerpt}</div>
+                  <div className="article-meta-bot">
+                    <span>{a.author?.display_name || 'パンダ先生'}</span><span>·</span><span>{new Date(a.created_at).toLocaleDateString('ja-JP')}</span><span>·</span><span>{a.reading_time || 5} min read</span>
+                  </div>
                 </div>
-              </div>
-            </a>
-          ))}
+              </Link>
+            ))
+          )}
         </div>
         <div className="top10">
           <div className="top10-head"><span className="badge">RANKING</span><h3>よく読まれている記事</h3></div>

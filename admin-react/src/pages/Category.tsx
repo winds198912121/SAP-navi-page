@@ -178,7 +178,7 @@ export default function CategoryPage() {
                   <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: 'var(--ink-3)' }}>まだ記事がありません。</div>
                 )}
                 {filteredArticles.map((a: any) => (
-                  <Link key={a.id} className="art-card" to={`/article/${a.slug}`}>
+                  <Link key={a.id} className="art-card" to={`/article/${a.id}/${a.slug}`}>
                     <div className="cover">
                       <svg viewBox="0 0 160 90" style={{ width: '100%', height: '100%' }}>
                         <rect width="160" height="90" fill={color + '22'} />
@@ -263,7 +263,7 @@ export default function CategoryPage() {
                   <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: 40, color: 'var(--ink-3)' }}>まだナレッジがありません。</div>
                 )}
                 {data.knowledge?.map((k: any) => (
-                  <Link key={k.id} to={`/knowledge/${k.id}`} className="art-card">
+                  <Link key={k.id} to={`/knowledge/${k.id}/${k.slug}`} className="art-card">
                     <div className="cover">
                       <svg viewBox="0 0 160 90" style={{ width: '100%', height: '100%' }}>
                         <rect width="160" height="90" fill={color + '22'} />

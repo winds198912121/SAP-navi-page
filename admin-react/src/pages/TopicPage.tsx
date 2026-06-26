@@ -95,7 +95,7 @@ export default function TopicPage() {
               </div>
               <div className="module-grid">
                 {articles.map((a, idx) => (
-                  <Link key={a.id} to={`/article/${a.slug}`}
+                  <Link key={a.id} to={`/article/${a.id}/${a.slug}`}
                     className="mod-card"
                     style={{ '--card-color': color, '--card-bg': bg } as React.CSSProperties}>
                     <div className="mod-top">

@@ -7,6 +7,8 @@ import KnowledgeList from './pages/admin/KnowledgeList'
 import KnowledgeForm from './pages/admin/KnowledgeForm'
 import LessonsList from './pages/admin/LessonsList'
 import LessonForm from './pages/admin/LessonForm'
+import LearningPathsList from './pages/admin/LearningPathsList'
+import LearningPathForm from './pages/admin/LearningPathForm'
 import AdminModules from './pages/admin/AdminModules'
 import ModuleForm from './pages/admin/ModuleForm'
 import ArticlesList from './pages/admin/ArticlesList'
@@ -24,6 +26,8 @@ import Dashboard from './pages/admin/Dashboard'
 import ContactInquiriesList from './pages/admin/ContactInquiriesList'
 import PluginsManager from './pages/admin/PluginsManager'
 import SeoGeoManager from './pages/admin/SeoGeoManager'
+import NoteList from './pages/admin/NoteList'
+import NoteForm from './pages/admin/NoteForm'
 import { useEffect } from 'react'
 import { AuthProvider } from './hooks/useAuth'
 import HomePage from './pages/Home'
@@ -43,6 +47,7 @@ import VideoPage from './pages/VideoPage'
 import CoursePage from './pages/CoursePage'
 import KnowledgePage from './pages/KnowledgePage'
 import LessonPage from './pages/LessonPage'
+import NotePage from './pages/NotePage'
 import SearchPage from './pages/SearchPage'
 import TopicPage from './pages/TopicPage'
 import About from './pages/About'
@@ -50,6 +55,7 @@ import Team from './pages/Team'
 import Contact from './pages/Contact'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
+import MobileBottomNav from './components/layout/MobileBottomNav'
 
 function ScrollToTop() {
   const { pathname } = useLocation()
@@ -65,7 +71,7 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/article/:slug" element={<ArticlePage />} />
+        <Route path="/article/:id/:slug" element={<ArticlePage />} />
         <Route path="/category/:module" element={<CategoryPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -81,8 +87,9 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
         <Route path="/course/:id" element={<CoursePage />} />
-        <Route path="/knowledge/:id" element={<KnowledgePage />} />
-        <Route path="/lesson/:id" element={<LessonPage />} />
+        <Route path="/knowledge/:id/:slug" element={<KnowledgePage />} />
+        <Route path="/lesson/:id/:slug" element={<LessonPage />} />
+        <Route path="/note/:id/:slug" element={<NotePage />} />
         <Route path="/video" element={<VideoPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/glossary" element={<TopicPage />} />
@@ -119,11 +126,18 @@ export default function App() {
           <Route path="quizzes" element={<QuizList />} />
           <Route path="quizzes/new" element={<QuizForm />} />
           <Route path="quizzes/:id/edit" element={<QuizForm />} />
+          <Route path="learning-paths" element={<LearningPathsList />} />
+          <Route path="learning-paths/new" element={<LearningPathForm />} />
+          <Route path="learning-paths/:id/edit" element={<LearningPathForm />} />
           <Route path="contact" element={<ContactInquiriesList />} />
+          <Route path="notes" element={<NoteList />} />
+          <Route path="notes/new" element={<NoteForm />} />
+          <Route path="notes/:id/edit" element={<NoteForm />} />
           <Route path="plugins" element={<PluginsManager />} />
           <Route path="seo-geo" element={<SeoGeoManager />} />
         </Route>
       </Routes>
+      <MobileBottomNav />
     </AuthProvider>
   )
 }

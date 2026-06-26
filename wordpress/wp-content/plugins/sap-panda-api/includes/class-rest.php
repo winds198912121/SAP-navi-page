@@ -571,7 +571,7 @@ class SAP_Panda_REST {
 
     private function format_lesson($post, $with_content = false) {
         $cid = (int) get_post_meta($post->ID, 'lesson_course_id', true); $course = $cid ? get_post($cid) : null;
-        return ['id' => $post->ID, 'title' => $post->post_title, 'excerpt' => get_the_excerpt($post), 'content' => $with_content ? apply_filters('the_content', $post->post_content) : '', 'order' => (int) get_post_meta($post->ID, 'lesson_order', true), 'time' => (string) get_post_meta($post->ID, 'lesson_time', true), 'course_id' => $cid, 'course_title' => $course ? $course->post_title : '', 'created_at' => $post->post_date];
+        return ['id' => $post->ID, 'slug' => $post->post_name, 'title' => $post->post_title, 'excerpt' => get_the_excerpt($post), 'content' => $with_content ? apply_filters('the_content', $post->post_content) : '', 'order' => (int) get_post_meta($post->ID, 'lesson_order', true), 'time' => (string) get_post_meta($post->ID, 'lesson_time', true), 'course_id' => $cid, 'course_title' => $course ? $course->post_title : '', 'created_at' => $post->post_date];
     }
 
     // ====== LEARNING PATHS ======
@@ -579,7 +579,7 @@ class SAP_Panda_REST {
         $paths = get_posts(['post_type' => 'learning_path', 'posts_per_page' => $request->get_param('per_page') ?: 10, 'post_status' => 'publish', 'orderby' => 'menu_order', 'order' => 'ASC']);
         $data = array_map(function($p) {
             $raw = get_post_meta($p->ID, 'path_steps', true); if (is_string($raw) && !empty($raw)) { $decoded = json_decode($raw, true); if (is_array($decoded)) $raw = $decoded; }
-            $steps = []; if (is_array($raw)) { $so = 0; foreach ($raw as $s) { $so++; $si = 0; $match = get_posts(['post_type' => 'path_step', 'posts_per_page' => 1, 'post_status' => 'publish', 'meta_query' => [['key' => 'step_path_id', 'value' => $p->ID], ['key' => 'step_order', 'value' => $so]]]); if (!empty($match)) $si = $match[0]->ID; $steps[] = ['id' => $si, 'title' => $s['step_title'] ?? $s['title'] ?? '', 'time' => $s['step_time'] ?? $s['time'] ?? '', 'content' => $s['step_content'] ?? $s['content'] ?? '']; } }
+            $steps = []; if (is_array($raw)) { $so = 0; foreach ($raw as $s) { $so++; $si = 0; $match = get_posts(['post_type' => 'path_step', 'posts_per_page' => 1, 'post_status' => 'publish', 'meta_query' => [['key' => 'step_path_id', 'value' => $p->ID], ['key' => 'step_order', 'value' => $so]]]); if (!empty($match)) $si = $match[0]->ID; $notes = $s['notes'] ?? []; if (!is_array($notes)) $notes = []; $cids = $s['course_ids'] ?? []; if (!is_array($cids)) $cids = []; $k_ids = $s['knowledge_ids'] ?? []; if (!is_array($k_ids)) $k_ids = []; $a_ids = $s['article_ids'] ?? []; if (!is_array($a_ids)) $a_ids = []; $steps[] = ['id' => $si, 'title' => $s['step_title'] ?? $s['title'] ?? '', 'time' => $s['step_time'] ?? $s['time'] ?? '', 'content' => $s['step_content'] ?? $s['content'] ?? '', 'course_ids' => $cids, 'courses' => $this->enrich_item_ids($cids, 'course'), 'knowledge_ids' => $k_ids, 'knowledge' => $this->enrich_item_ids($k_ids, 'knowledge'), 'article_ids' => $a_ids, 'articles' => $this->enrich_item_ids($a_ids, 'post')]; } }
             $rids = get_post_meta($p->ID, 'path_related_articles', true) ?: []; if (is_string($rids)) $rids = array_filter(explode(',', $rids));
             $related = []; if (is_array($rids)) foreach ($rids as $aid) { $a = get_post($aid); if ($a && $a->post_status === 'publish') $related[] = ['id' => $a->ID, 'title' => $a->post_title, 'slug' => $a->post_name]; }
             return ['id' => $p->ID, 'title' => $p->post_title, 'audience' => (string) get_post_meta($p->ID, 'path_audience', true), 'description' => (string) get_post_meta($p->ID, 'path_description', true), 'steps' => $steps, 'duration' => (string) get_post_meta($p->ID, 'path_duration', true), 'accent' => get_post_meta($p->ID, 'path_accent', true) ?: '#5a9d6e', 'article_count' => count($related), 'related_articles' => $related, 'cta_url' => (string) get_post_meta($p->ID, 'path_cta_url', true) ?: '/', 'created_at' => $p->post_date];
@@ -590,12 +590,30 @@ class SAP_Panda_REST {
     public function get_learning_path($request) {
         $post = get_post($request['id']); if (!$post || $post->post_type !== 'learning_path') return new WP_REST_Response(['success' => false, 'message' => 'Not found'], 404);
         $raw = get_post_meta($post->ID, 'path_steps', true) ?: []; if (is_string($raw) && !empty($raw)) { $decoded = json_decode($raw, true); if (is_array($decoded)) $raw = $decoded; }
-        $steps = []; if (is_array($raw)) { $so = 0; foreach ($raw as $s) { $so++; $si = 0; $match = get_posts(['post_type' => 'path_step', 'posts_per_page' => 1, 'post_status' => 'publish', 'meta_query' => [['key' => 'step_path_id', 'value' => $post->ID], ['key' => 'step_order', 'value' => $so]]]); if (!empty($match)) $si = $match[0]->ID; $steps[] = ['id' => $si, 'title' => $s['step_title'] ?? $s['title'] ?? '', 'time' => $s['step_time'] ?? $s['time'] ?? '', 'content' => $s['step_content'] ?? $s['content'] ?? '']; } }
+        $steps = []; if (is_array($raw)) { $so = 0; foreach ($raw as $s) { $so++; $si = 0; $match = get_posts(['post_type' => 'path_step', 'posts_per_page' => 1, 'post_status' => 'publish', 'meta_query' => [['key' => 'step_path_id', 'value' => $post->ID], ['key' => 'step_order', 'value' => $so]]]); if (!empty($match)) $si = $match[0]->ID; $notes = $s['notes'] ?? []; if (!is_array($notes)) $notes = []; $cids = $s['course_ids'] ?? []; if (!is_array($cids)) $cids = []; $k_ids = $s['knowledge_ids'] ?? []; if (!is_array($k_ids)) $k_ids = []; $a_ids = $s['article_ids'] ?? []; if (!is_array($a_ids)) $a_ids = []; $steps[] = ['id' => $si, 'title' => $s['step_title'] ?? $s['title'] ?? '', 'time' => $s['step_time'] ?? $s['time'] ?? '', 'content' => $s['step_content'] ?? $s['content'] ?? '', 'course_ids' => $cids, 'courses' => $this->enrich_item_ids($cids, 'course'), 'knowledge_ids' => $k_ids, 'knowledge' => $this->enrich_item_ids($k_ids, 'knowledge'), 'article_ids' => $a_ids, 'articles' => $this->enrich_item_ids($a_ids, 'post')]; } }
         $rids = get_post_meta($post->ID, 'path_related_articles', true) ?: []; $related = []; if (is_array($rids)) foreach ($rids as $aid) { $a = get_post($aid); if ($a && $a->post_status === 'publish') $related[] = ['id' => $a->ID, 'title' => $a->post_title, 'slug' => $a->post_name]; }
         return new WP_REST_Response(['success' => true, 'data' => ['id' => $post->ID, 'title' => $post->post_title, 'audience' => (string) get_post_meta($post->ID, 'path_audience', true), 'description' => (string) get_post_meta($post->ID, 'path_description', true), 'steps' => $steps, 'duration' => (string) get_post_meta($post->ID, 'path_duration', true), 'accent' => get_post_meta($post->ID, 'path_accent', true) ?: '#5a9d6e', 'article_count' => count($related), 'related_articles' => $related, 'cta_url' => (string) get_post_meta($post->ID, 'path_cta_url', true) ?: '/', 'created_at' => $post->post_date]]);
     }
 
-    // ====== STEPS ======
+
+    private function enrich_item_ids($ids, $post_type) {
+        if (!is_array($ids) || empty($ids)) return [];
+        $items = [];
+        foreach ($ids as $id) {
+            $p = get_post((int) $id);
+            if (!$p || $p->post_type !== $post_type || $p->post_status !== 'publish') continue;
+            $m = wp_get_object_terms($p->ID, 'sap_module', ['fields' => 'all']);
+            $items[] = [
+                'id' => $p->ID,
+                'slug' => $p->post_name,
+                'title' => $p->post_title,
+                'module' => !empty($m) ? ['slug' => $m[0]->slug, 'name' => $m[0]->name] : null,
+            ];
+        }
+        return $items;
+    }
+
+        // ====== STEPS ======
     public function get_steps($request) {
         $args = ['post_type' => 'path_step', 'posts_per_page' => $request->get_param('per_page') ?: 20, 'post_status' => 'publish', 'meta_key' => 'step_order', 'orderby' => 'meta_value_num', 'order' => 'ASC'];
         if ($pid = $request->get_param('path_id')) $args['meta_query'] = [['key' => 'step_path_id', 'value' => $pid]];
@@ -607,7 +625,35 @@ class SAP_Panda_REST {
 
     private function format_step($post, $with_content = false) {
         $pid = (int) get_post_meta($post->ID, 'step_path_id', true); $path = $pid ? get_post($pid) : null;
-        return ['id' => $post->ID, 'title' => $post->post_title, 'excerpt' => get_the_excerpt($post), 'content' => $with_content ? apply_filters('the_content', $post->post_content) : '', 'step_order' => (int) get_post_meta($post->ID, 'step_order', true), 'step_time' => (string) get_post_meta($post->ID, 'step_time', true), 'path_id' => $pid, 'path_title' => $path ? $path->post_title : '', 'created_at' => $post->post_date];
+        $notes = get_post_meta($post->ID, 'step_notes', true);
+        if (!is_array($notes)) $notes = [];
+        // Fetch content from parent learning path's path_steps
+        $path_items = ['courses' => [], 'knowledge' => [], 'articles' => []];
+        if ($pid) {
+            $raw = get_post_meta($pid, 'path_steps', true);
+            if (is_string($raw) && !empty($raw)) { $decoded = json_decode($raw, true); if (is_array($decoded)) $raw = $decoded; }
+            if (is_array($raw)) {
+                $so = (int) get_post_meta($post->ID, 'step_order', true);
+                foreach ($raw as $s) {
+                    $s_order = $s['step_order'] ?? 0;
+                    $s_title = $s['step_title'] ?? $s['title'] ?? '';
+                    if ($s_order === $so || $s_title === $post->post_title) {
+                        // Enrich raw IDs into full items
+                        $cids = $s['course_ids'] ?? [];
+                        $k_ids = $s['knowledge_ids'] ?? [];
+                        $a_ids = $s['article_ids'] ?? [];
+                        if (!is_array($cids)) $cids = [];
+                        if (!is_array($k_ids)) $k_ids = [];
+                        if (!is_array($a_ids)) $a_ids = [];
+                        $path_items['courses'] = $this->enrich_item_ids($cids, 'course');
+                        $path_items['knowledge'] = $this->enrich_item_ids($k_ids, 'knowledge');
+                        $path_items['articles'] = $this->enrich_item_ids($a_ids, 'post');
+                        break;
+                    }
+                }
+            }
+        }
+        return ['id' => $post->ID, 'title' => $post->post_title, 'excerpt' => get_the_excerpt($post), 'content' => $with_content ? apply_filters('the_content', $post->post_content) : '', 'step_order' => (int) get_post_meta($post->ID, 'step_order', true), 'step_time' => (string) get_post_meta($post->ID, 'step_time', true), 'path_id' => $pid, 'path_title' => $path ? $path->post_title : '', 'notes' => $notes, 'path_items' => $path_items, 'created_at' => $post->post_date];
     }
 
     // ====== VIDEOS ======
@@ -626,7 +672,7 @@ class SAP_Panda_REST {
         if ($t = $request->get_param('type')) $args['meta_query'] = [['key' => 'knowledge_type', 'value' => $t]];
         if ($q = $request->get_param('q')) $args['s'] = $q;
         $query = new WP_Query($args);
-        $data = array_map(function($p) { $m = wp_get_object_terms($p->ID, 'sap_module', ['fields' => 'all']); $d = wp_get_object_terms($p->ID, 'difficulty', ['fields' => 'all']); return ['id' => $p->ID, 'title' => $p->post_title, 'excerpt' => get_the_excerpt($p), 'type' => get_post_meta($p->ID, 'knowledge_type', true), 'module' => !empty($m) ? ['slug' => $m[0]->slug, 'name' => $m[0]->name] : null, 'difficulty' => !empty($d) ? ['slug' => $d[0]->slug, 'name' => $d[0]->name] : null, 'created_at' => $p->post_date, 'updated_at' => $p->post_modified]; }, $query->posts);
+        $data = array_map(function($p) { $m = wp_get_object_terms($p->ID, 'sap_module', ['fields' => 'all']); $d = wp_get_object_terms($p->ID, 'difficulty', ['fields' => 'all']); return ['id' => $p->ID, 'slug' => $p->post_name, 'title' => $p->post_title, 'excerpt' => get_the_excerpt($p), 'type' => get_post_meta($p->ID, 'knowledge_type', true), 'module' => !empty($m) ? ['slug' => $m[0]->slug, 'name' => $m[0]->name] : null, 'difficulty' => !empty($d) ? ['slug' => $d[0]->slug, 'name' => $d[0]->name] : null, 'created_at' => $p->post_date, 'updated_at' => $p->post_modified]; }, $query->posts);
         return new WP_REST_Response(['success' => true, 'data' => $data, 'total' => $query->found_posts]);
     }
 
@@ -634,7 +680,7 @@ class SAP_Panda_REST {
         $post = get_post($request['id']); if (!$post || $post->post_type !== 'knowledge') return new WP_REST_Response(['success' => false, 'message' => 'Not found'], 404);
         $m = wp_get_object_terms($post->ID, 'sap_module', ['fields' => 'all']); $d = wp_get_object_terms($post->ID, 'difficulty', ['fields' => 'all']);
         $refs = get_post_meta($post->ID, 'knowledge_references', true) ?: []; if (is_string($refs)) $refs = [];
-        return new WP_REST_Response(['success' => true, 'data' => ['id' => $post->ID, 'title' => $post->post_title, 'content' => apply_filters('the_content', $post->post_content), 'excerpt' => get_the_excerpt($post), 'type' => get_post_meta($post->ID, 'knowledge_type', true), 'module' => !empty($m) ? ['slug' => $m[0]->slug, 'name' => $m[0]->name] : null, 'difficulty' => !empty($d) ? ['slug' => $d[0]->slug, 'name' => $d[0]->name] : null, 'references' => is_array($refs) ? $refs : [], 'created_at' => $post->post_date, 'updated_at' => $post->post_modified]]);
+        return new WP_REST_Response(['success' => true, 'data' => ['id' => $post->ID, 'slug' => $post->post_name, 'title' => $post->post_title, 'content' => apply_filters('the_content', $post->post_content), 'excerpt' => get_the_excerpt($post), 'type' => get_post_meta($post->ID, 'knowledge_type', true), 'module' => !empty($m) ? ['slug' => $m[0]->slug, 'name' => $m[0]->name] : null, 'difficulty' => !empty($d) ? ['slug' => $d[0]->slug, 'name' => $d[0]->name] : null, 'references' => is_array($refs) ? $refs : [], 'created_at' => $post->post_date, 'updated_at' => $post->post_modified]]);
     }
 
     public function create_knowledge($request) {

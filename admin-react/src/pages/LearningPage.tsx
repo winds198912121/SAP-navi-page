@@ -14,6 +14,7 @@ import api from '../services/api'
 
 interface Step {
   id?: number; title: string; time: string; content?: string
+  courses?: any[]; knowledge?: any[]; articles?: any[]
 }
 interface RelatedArticle { id: number; title: string; slug: string }
 interface PathData {
@@ -119,7 +120,11 @@ export default function LearningPage() {
                   }}>{i + 1}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--ink-0)' }}>{s.title}</div>
-                    {i === currentStep && s.time && <div style={{ fontSize: 12, color: 'var(--ink-3)', marginTop: 2 }}>所要時間: {s.time}</div>}
+                    <div style={{ display: 'flex', gap: 10, marginTop: 3, fontSize: 11.5 }}>
+                      {(s.courses?.length || 0) > 0 && <span style={{ color: '#5a9d6e' }}>📚 {(s.courses || []).length}</span>}
+                      {(s.knowledge?.length || 0) > 0 && <span style={{ color: '#3b82f6' }}>📖 {(s.knowledge || []).length}</span>}
+                      {(s.articles?.length || 0) > 0 && <span style={{ color: '#8b5cf6' }}>📰 {(s.articles || []).length}</span>}
+                    </div>
                   </div>
                   <span style={{ fontFamily: 'var(--font-mono)', fontSize: 11, color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>{s.time}</span>
                   <span style={{ fontSize: 18, color: 'var(--accent)' }}>→</span>
@@ -138,7 +143,7 @@ export default function LearningPage() {
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {path.related_articles.map((a: RelatedArticle) => (
                     <li key={a.id}>
-                      <Link to={`/article/${a.slug}`} style={{ fontSize: 13, color: 'var(--ink-1)', textDecoration: 'none', lineHeight: 1.5, display: 'block', padding: '6px 10px', borderRadius: 'var(--r-sm)', background: 'var(--bg-1)' }}>
+                      <Link to={`/article/${a.id}/${a.slug}`} style={{ fontSize: 13, color: 'var(--ink-1)', textDecoration: 'none', lineHeight: 1.5, display: 'block', padding: '6px 10px', borderRadius: 'var(--r-sm)', background: 'var(--bg-1)' }}>
                         {a.title}
                       </Link>
                     </li>

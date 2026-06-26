@@ -1,32 +1,103 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import Seo from '../components/layout/Seo'
 import SiteHeader from '../components/layout/Header'
 import SiteFooter from '../components/layout/Footer'
 import FloatingPanda from '../components/layout/FloatingPanda'
 import { useTheme } from '../hooks/useTheme'
-import { ARTICLE_DATA } from '../types'
 import { scrollToHeading, throttle } from '../utils'
+import api from '../services/api'
 
-const TOC = [
-  { id: 's1', label: 'はじめに：仕訳って何？' },
-  { id: 's2', label: '左右がイコール — たったひとつのルール' },
-  { id: 's3', label: 'SAP での仕訳のしくみ' },
-  { id: 's4', label: 'FB50 で実際に入力してみよう' },
-  { id: 's5', label: 'よくある間違いと対処法' },
-  { id: 's6', label: 'まとめ — パンダ先生からの一言' },
-]
+const MODULE_COLORS: Record<string, string> = {
+  fi: '#2f6d44', co: '#2641a1', mm: '#a25411', sd: '#b62a4a',
+  pp: '#4828a8', hr: '#8a6212', abap: '#1f6f6f', basis: '#4a432d', s4: '#1864a3',
+}
+
+const MODULE_NAMES: Record<string, string> = {
+  fi: 'FI · 財務会計', co: 'CO · 管理会計', mm: 'MM · 購買・在庫',
+  sd: 'SD · 販売管理', pp: 'PP · 生産計画', hr: 'HR · 人事管理',
+  abap: 'ABAP · 開発言語', basis: 'Basis · 基盤管理', s4: 'S/4 · S/4HANA',
+}
+
+function buildTOC(content: string): { id: string; label: string }[] {
+  const ids: { id: string; label: string }[] = []
+  const re = /<h([23])[^>]*id=["']([^"']+)["'][^>]*>([^<]+)<\/h[23]>/gi
+  let m
+  while ((m = re.exec(content)) !== null) {
+    ids.push({ id: m[2], label: m[3].replace(/&\w+;/g, '') })
+  }
+  // Fallback: auto-generate from h2-only
+  if (ids.length === 0) {
+    const h2re = /<h2[^>]*>([^<]+)<\/h2>/gi
+    let i = 0
+    while ((m = h2re.exec(content)) !== null) {
+      ids.push({ id: `s${++i}`, label: m[1].replace(/&\w+;/g, '') })
+    }
+  }
+  return ids
+}
+
+function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
+  const d = new Date(dateStr)
+  return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`
+}
+
+function estimateReadingTime(content: string): number {
+  const text = content.replace(/<[^>]+>/g, '').trim()
+  const jp = (text.match(/[぀-ゟ゠-ヿ一-鿿]/g) || []).length
+  const other = text.replace(/[぀-ゟ゠-ヿ一-鿿\s]/g, '').length
+  return Math.max(1, Math.round((jp / 500 + other / 200)))
+}
 
 export default function ArticlePage() {
-  const { slug } = useParams()
-  const [activeToc, setActiveToc] = useState('s1')
-  const { settings, updateSetting } = useTheme()
+  const { id, slug } = useParams()
+  const [article, setArticle] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [notFound, setNotFound] = useState(false)
+  const [activeToc, setActiveToc] = useState('')
+  const { settings } = useTheme()
   const [showTweaks, setShowTweaks] = useState(false)
 
+  // Fetch article by ID
   useEffect(() => {
+    if (!id || !/^\d+$/.test(id)) {
+      setNotFound(true)
+      setLoading(false)
+      return
+    }
+    setLoading(true)
+    setNotFound(false)
+    api.getArticle(parseInt(id, 10)).then(res => {
+      if (res.success && res.data) {
+        setArticle(res.data)
+      } else {
+        setNotFound(true)
+      }
+    }).catch(() => {
+      setNotFound(true)
+    }).finally(() => setLoading(false))
+  }, [id])
+
+  const content = article?.content || ''
+  const TOC = useMemo(() => buildTOC(content), [content])
+  const readingTime = article?.reading_time || estimateReadingTime(content)
+  const modSlug = article?.modules?.[0]?.slug || 'fi'
+  const modColor = MODULE_COLORS[modSlug] || '#5a9d6e'
+  const topicLabel = article?.topic?.name || ''
+  const diffLabel = article?.difficulty?.slug === 'beginner' ? '初級'
+    : article?.difficulty?.slug === 'intermediate' ? '中級'
+    : article?.difficulty?.slug === 'advanced' ? '上級' : ''
+  const diffLevel = article?.difficulty?.slug === 'beginner' ? 1
+    : article?.difficulty?.slug === 'intermediate' ? 2
+    : article?.difficulty?.slug === 'advanced' ? 3 : 0
+
+  // Scroll-spy for TOC
+  useEffect(() => {
+    if (TOC.length === 0) return
     const onScroll = throttle(() => {
       const viewTop = window.scrollY + 160
-      let active = 's1'
+      let active = TOC[0]?.id || ''
       for (const t of TOC) {
         const el = document.getElementById(t.id)
         if (el) {
@@ -39,23 +110,66 @@ export default function ArticlePage() {
     window.addEventListener('scroll', onScroll, { passive: true })
     onScroll()
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [TOC])
+
+  // Loading state
+  if (loading) {
+    return (
+      <>
+        <div className="page-bg" />
+        <SiteHeader active="modules" />
+        <div style={{ textAlign: 'center', padding: '120px 20px', color: 'var(--ink-3)' }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🐼</div>
+          <div>読み込み中...</div>
+        </div>
+        <SiteFooter />
+        {settings.showFloatingPanda && <FloatingPanda />}
+      </>
+    )
+  }
+
+  // Not found state
+  if (notFound || !article) {
+    return (
+      <>
+        <div className="page-bg" />
+        <SiteHeader active="modules" />
+        <div style={{ textAlign: 'center', padding: '120px 20px' }}>
+          <div style={{ fontSize: 64, marginBottom: 16 }}>🔍</div>
+          <h2 style={{ fontFamily: 'var(--font-display)', color: 'var(--ink-0)' }}>記事が見つかりませんでした</h2>
+          <p style={{ color: 'var(--ink-2)', margin: '12px 0 24px' }}>
+            お探しの記事は存在しないか、移動した可能性があります。
+          </p>
+          <Link to="/" className="btn accent" style={{ textDecoration: 'none' }}>
+            ホームに戻る
+          </Link>
+        </div>
+        <SiteFooter />
+        {settings.showFloatingPanda && <FloatingPanda />}
+      </>
+    )
+  }
+
+  const articleTitle = article.title || ''
+  const articleExcerpt = article.excerpt || ''
+  const articleDate = formatDate(article.created_at || article.createdAt || '')
+  const modName = MODULE_NAMES[modSlug] || article?.modules?.[0]?.name || ''
+  const authorName = article.author?.display_name || article.author?.displayName || 'パンダ先生'
 
   return (
     <>
       <Seo
-        title="仕訳って結局なに？借方・貸方の覚え方を一発で解説"
-        description="簿記の本を3冊買ってもピンとこない人へ。覚えるべきは「左右がイコール」というたった一つのルールだけ。パンダ先生と一緒に、世界一やさしい仕訳入門を始めよう。SAP 会計伝票 FB50 の基本操作も解説。"
-        path={slug ? `/article/${slug}` : '/article'}
+        title={articleTitle}
+        description={articleExcerpt || articleTitle}
+        path={id && slug ? `/article/${id}/${slug}` : '/article'}
         type="article"
-        publishedTime="2026-05-19T00:00:00+09:00"
-        author="パンダ先生"
+        publishedTime={article.created_at || article.createdAt}
+        author={authorName}
         breadcrumbs={[
           { name: 'ホーム', path: '/' },
-          { name: 'FI · 財務会計', path: '/category/fi' },
-          { name: '仕訳のしくみ', path: slug ? `/article/${slug}` : '/article' },
+          { name: modName || 'モジュール', path: `/category/${modSlug}` },
+          { name: articleTitle, path: id && slug ? `/article/${id}/${slug}` : '/article' },
         ]}
-        image={`${window.location.origin}/fi-article-cover.png`}
       />
       <div className="page-bg" />
       <SiteHeader active="modules" />
@@ -64,59 +178,42 @@ export default function ArticlePage() {
         <div className="crumb">
           <Link to="/">ホーム</Link>
           <span className="sep">›</span>
-          <Link to="/category/fi">FI · 財務会計</Link>
+          <Link to={`/category/${modSlug}`}>{modName}</Link>
           <span className="sep">›</span>
-          <span className="now">仕訳のしくみ</span>
+          <span className="now">{articleTitle}</span>
         </div>
         <div className="meta-top" style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', fontSize: 12.5, marginBottom: 16 }}>
-          <span className="tag-mod fi">FI</span>
-          <span className="tag-diff l1">初級</span>
-          <span style={{ color: 'var(--ink-3)' }}>· 基本概念</span>
-          <span style={{ color: 'var(--ink-3)' }}>· 公開：2026年5月19日</span>
-          <span style={{ color: 'var(--ink-3)' }}>· 6 min read</span>
+          <span className={`tag-mod ${modSlug}`}>{modSlug.toUpperCase()}</span>
+          {diffLevel > 0 && <span className={`tag-diff l${diffLevel}`}>{diffLabel}</span>}
+          {topicLabel && <span style={{ color: 'var(--ink-3)' }}>· {topicLabel}</span>}
+          {articleDate && <span style={{ color: 'var(--ink-3)' }}>· {articleDate}</span>}
+          <span style={{ color: 'var(--ink-3)' }}>· {readingTime} min read</span>
         </div>
-        <h1>「仕訳」って結局なに？借方・貸方の覚え方を、パンダ先生が一発で解説</h1>
-        <p className="lead">
-          簿記の本を3冊買ってもピンとこない。SAP の画面を見てもよくわからない。
-          そんなあなたへ。覚えるべきは「左右がイコール」というたった一つのルールだけです。
-          パンダ先生と一緒に、世界一やさしい仕訳入門を始めよう。
-        </p>
+        <h1>{articleTitle}</h1>
+        {articleExcerpt && <p className="lead">{articleExcerpt}</p>}
         <div className="art-hero-cover">
           <svg viewBox="0 0 720 320" style={{ width: '100%', height: '100%' }}>
-            <rect width="720" height="320" fill="linear-gradient(135deg, var(--accent-soft), var(--accent-2-soft))" />
-            <text x="360" y="160" textAnchor="middle" fontSize="48" fontWeight="700" fill="#2f6d44" fontFamily="Zen Maru Gothic">FI · 財務会計</text>
+            <rect width="720" height="320" fill={modColor + '22'} />
+            <text x="360" y="160" textAnchor="middle" fontSize="48" fontWeight="700" fill={modColor} fontFamily="Zen Maru Gothic">
+              {modSlug.toUpperCase()} · {modName.split('·')[1]?.trim() || modName}
+            </text>
           </svg>
         </div>
       </article>
 
       <div className="art-body-wrap">
         <div className="art-content">
-          <div className="dialog student">
-            <div className="av">
-              <svg width="64" height="64" viewBox="0 0 100 100">
-                <circle cx="50" cy="52" r="46" fill="#5aa0e6" opacity="0.12" />
-                <circle cx="50" cy="52" r="42" fill="#fff" />
-                <path d="M 50 22 C 28 22 20 38 20 56 C 20 76 32 88 50 88 C 68 88 80 76 80 56 C 80 38 72 22 50 22 Z" fill="#f4d8c0" />
-                <path d="M 18 50 Q 18 16 50 14 Q 84 16 84 52 Q 80 38 70 32 Q 64 42 56 36 Q 52 44 44 36 Q 38 44 30 36 Q 24 44 18 50 Z" fill="#1e1610" />
-                <ellipse cx="38" cy="56" rx="2.6" ry="3.6" fill="#0e0a05" />
-                <ellipse cx="62" cy="56" rx="2.6" ry="3.6" fill="#0e0a05" />
-                <ellipse cx="28" cy="68" rx="4" ry="2.5" fill="#f4a8b0" opacity="0.55" />
-                <ellipse cx="72" cy="68" rx="4" ry="2.5" fill="#f4a8b0" opacity="0.55" />
-                <ellipse cx="50" cy="76" rx="2.5" ry="3" fill="#0e0a05" />
-              </svg>
-            </div>
-            <div className="bubble">
-              <span className="who">たろうくん：</span>
-              先生、SAPで会計画面を見ると「借方」「貸方」って出てくるんですけど、
-              いつも左右どっちが何だっけ？ってなります。覚え方ありますか？
-            </div>
-          </div>
+          <div dangerouslySetInnerHTML={{ __html: content }} />
 
-          <div className="dialog">
-            <div className="av">
-              <svg width="64" height="64" viewBox="0 0 100 100">
-                <circle cx="50" cy="52" r="46" fill="#1f4ea3" opacity="0.12" />
-                <circle cx="50" cy="52" r="42" fill="#fff" />
+          {/* Feedback */}
+          <div style={{ marginTop: 48 }}>
+            <div style={{
+              padding: '24px 26px', background: 'var(--bg-card)',
+              borderRadius: 'var(--r-lg)', border: '1px solid var(--line-2)',
+              display: 'flex', alignItems: 'center', gap: 14,
+            }}>
+              <svg width="56" height="56" viewBox="-4 -8 108 108">
+                <circle cx="50" cy="52" r="46" fill="#e8f0fb" opacity="0.4" />
                 <path d="M 50 12 C 22 12 8 32 8 54 C 8 76 24 90 50 90 C 76 90 92 76 92 54 C 92 32 78 12 50 12 Z" fill="#fdfaf2" />
                 <g>
                   <path d="M 18 36 Q 22 28 32 30 Q 42 32 42 44 Q 42 56 32 58 Q 20 58 16 50 Q 14 42 18 36 Z" fill="#1a1612" />
@@ -127,115 +224,69 @@ export default function ArticlePage() {
                 <ellipse cx="50" cy="62" rx="3.4" ry="2.5" fill="#1a1612" />
                 <path d="M 42 68 Q 50 78 58 68" fill="#1a1612" />
               </svg>
-            </div>
-            <div className="bubble">
-              <span className="who">パンダ先生：</span>
-              いい質問だね！🎋  実は SAPer の 8 割が最初につまずくところ。
-              でも安心して。これから話す「<strong>左右イコール</strong>」さえ覚えれば、
-              98% の仕訳は自分で考えられるようになるよ。
-            </div>
-          </div>
-
-          <h2 id="s1">はじめに：仕訳って何？</h2>
-          <p>
-            <strong>仕訳（しわけ）</strong> とは、お金の動きを「左右に分けて記録する」というだけのこと。
-            会社で起きたあらゆる取引 — 商品を売った、給料を払った、機械を買った —
-            これら全部を、「<strong>借方（左）</strong>」と「<strong>貸方（右）</strong>」のセットで書き残します。
-          </p>
-
-          <h2 id="s2">左右がイコール — たったひとつのルール</h2>
-          <blockquote style={{ margin: '24px 0', padding: '18px 22px', background: 'var(--bg-tint)', borderLeft: '4px solid var(--accent)', borderRadius: '0 var(--r-md) var(--r-md) 0', fontStyle: 'italic' }}>
-            借方の合計 = 貸方の合計 — 必ず一致する。
-          </blockquote>
-          <p>
-            たとえば、現金 100 円で商品を売ったら：
-          </p>
-          <ul>
-            <li><strong>借方</strong>：現金 100（会社に現金が入った）</li>
-            <li><strong>貸方</strong>：売上 100（売上が立った）</li>
-          </ul>
-
-          <div className="callout-box">
-            <div className="ic">💡</div>
-            <div>
-              <div className="title">パンダ先生のひとくちメモ</div>
-              <p className="text">
-                「借方」「貸方」という言葉自体には意味はありません。
-                ただの<strong>左右の名前</strong>。「左 = 借方、右 = 貸方」と機械的に覚えるのが最速ルート。
-              </p>
-            </div>
-          </div>
-
-          <h2 id="s3">SAP での仕訳のしくみ</h2>
-          <p>
-            SAP では、仕訳は <strong>会計伝票（Accounting Document）</strong> という単位で管理されます。
-            1 つの伝票には複数の明細（Line Item）があって、それぞれに金額と勘定科目が紐付きます。
-          </p>
-
-          <h3 id="s4">FB50 で実際に入力してみよう</h3>
-          <p>
-            最も基本的な G/L 仕訳入力画面が <code>FB50</code> です。
-            ヘッダーに会社コードと文書日付、明細欄に勘定科目・借方/貸方区分・金額を入れていきます。
-          </p>
-
-          <h2 id="s5">よくある間違いと対処法</h2>
-          <p>新人 SAPer が仕訳入力でやらかしがちなパターンを 3 つ。</p>
-          <h3>① 借方・貸方を逆にする</h3>
-          <p>
-            「現金が増えるのは借方」と覚えているはずが、咄嗟に逆に入れてしまう。
-            <strong>F5 でシミュレーション</strong>すれば仕訳プレビューが見られるので、保存前にかならず確認。
-          </p>
-          <h3>② 消費税を忘れる</h3>
-          <p>
-            税込・税抜の区別、消費税コード（<code>V0</code>, <code>V1</code> など）の選択。
-            これが間違うと月末に経理から「全件直して」と依頼が来ます。
-          </p>
-          <h3>③ 文書日付と転記日付を混同する</h3>
-          <p>月またぎの取引で重要な差が出るので要注意。</p>
-
-          <div style={{ marginTop: 40, padding: '24px 26px', background: 'var(--bg-card)', borderRadius: 'var(--r-lg)', border: '1px solid var(--line-2)', display: 'flex', alignItems: 'center', gap: 14 }}>
-            <svg width="56" height="56" viewBox="-4 -8 108 108">
-              <circle cx="50" cy="52" r="46" fill="#e8f0fb" opacity="0.4" />
-              <path d="M 50 12 C 22 12 8 32 8 54 C 8 76 24 90 50 90 C 76 90 92 76 92 54 C 92 32 78 12 50 12 Z" fill="#fdfaf2" />
-              <g>
-                <path d="M 18 36 Q 22 28 32 30 Q 42 32 42 44 Q 42 56 32 58 Q 20 58 16 50 Q 14 42 18 36 Z" fill="#1a1612" />
-                <path d="M 82 36 Q 78 28 68 30 Q 58 32 58 44 Q 58 56 68 58 Q 80 58 84 50 Q 86 42 82 36 Z" fill="#1a1612" />
-              </g>
-              <circle cx="30" cy="44" r="3.4" fill="#fff" /><circle cx="30" cy="44" r="2.4" fill="#0e0a05" />
-              <circle cx="70" cy="44" r="3.4" fill="#fff" /><circle cx="70" cy="44" r="2.4" fill="#0e0a05" />
-              <ellipse cx="50" cy="62" rx="3.4" ry="2.5" fill="#1a1612" />
-              <path d="M 42 68 Q 50 78 58 68" fill="#1a1612" />
-            </svg>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink-0)', marginBottom: 2 }}>この記事、役に立った？</div>
-              <div style={{ fontSize: 13, color: 'var(--ink-2)' }}>反応をくれると、パンダ先生のやる気が +100 します。</div>
-            </div>
-            <div style={{ display: 'flex', gap: 6 }}>
-              {['👍', '❤', '🎋', '🙏'].map(e => (
-                <button key={e} type="button" style={{ width: 44, height: 44, borderRadius: '50%', border: '1.5px solid var(--line-2)', background: 'var(--bg-1)', fontSize: 20, cursor: 'pointer' }}>{e}</button>
-              ))}
+              <div style={{ flex: 1 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 16, color: 'var(--ink-0)', marginBottom: 2 }}>この記事、役に立った？</div>
+                <div style={{ fontSize: 13, color: 'var(--ink-2)' }}>反応をくれると、パンダ先生のやる気が +100 します。</div>
+              </div>
+              <div style={{ display: 'flex', gap: 6 }}>
+                {['👍', '❤', '🎋', '🙏'].map(e => (
+                  <button key={e} type="button"
+                    style={{ width: 44, height: 44, borderRadius: '50%', border: '1.5px solid var(--line-2)', background: 'var(--bg-1)', fontSize: 20, cursor: 'pointer' }}>
+                    {e}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
+        {/* Sidebar: 目次 + 関連記事 */}
         <aside className="art-side">
-          <div className="toc-card">
-            <h5>目次</h5>
-            <ul className="toc-list">
-              {TOC.map(t => (
-                <li key={t.id}>
-                  <a href={`#${t.id}`} className={activeToc === t.id ? 'active' : ''}
-                    onClick={(e) => { e.preventDefault(); scrollToHeading(t.id) }}>{t.label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="toc-card" style={{ background: 'linear-gradient(135deg, var(--accent-soft), var(--bg-card))', borderColor: 'var(--accent)' }}>
-            <h5 style={{ color: 'var(--accent-deep)' }}>📚 次の記事</h5>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 14, color: 'var(--ink-0)', lineHeight: 1.45 }}>
-              FB50 vs F-02 の使い分け完全ガイド
+          {TOC.length > 0 && (
+            <div className="toc-card">
+              <h5>目次</h5>
+              <ul className="toc-list">
+                {TOC.map(t => (
+                  <li key={t.id}>
+                    <a href={`#${t.id}`} className={activeToc === t.id ? 'active' : ''}
+                      onClick={(e) => { e.preventDefault(); scrollToHeading(t.id) }}>
+                      {t.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
+          )}
+          {article.related_articles && article.related_articles.length > 0 && (
+            <div className="toc-card">
+              <h5>📚 関連記事</h5>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                {article.related_articles.slice(0, 4).map((ra: any) => (
+                  <Link key={ra.id} to={`/article/${ra.id}/${ra.slug}`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                      background: 'var(--bg-1)', borderRadius: 'var(--r-md)',
+                      textDecoration: 'none', fontSize: 13,
+                      transition: 'all .15s',
+                    }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 6, background: modColor + '22',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontWeight: 800, fontSize: 11, color: modColor, flexShrink: 0,
+                    }}>
+                      {modSlug.toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, color: 'var(--ink-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {ra.title}
+                      </div>
+                    </div>
+                    <span style={{ color: 'var(--ink-3)', fontSize: 14, flexShrink: 0 }}>→</span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </aside>
       </div>
 

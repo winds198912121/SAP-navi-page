@@ -155,7 +155,7 @@ export default function SearchPage() {
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {results.map((article) => (
-                    <Link key={article.id} to={`/article/${article.slug}`}
+                    <Link key={article.id} to={`/article/${article.id}/${article.slug}`}
                       style={{
                         display: 'flex', gap: 16, padding: '16px 20px',
                         background: 'var(--bg-card)', borderRadius: 'var(--r-lg)',

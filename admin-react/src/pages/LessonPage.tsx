@@ -1,9 +1,10 @@
 // ===========================================================
-// LessonPage — レッスン詳細画面 /lesson/:id
+// LessonPage — レッスン詳細画面 /lesson/:id/:slug
+// SEO最適化 + 未ログインユーザーは一部のみ表示
 // ===========================================================
 
 import { useState, useEffect, useMemo } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import Seo from '../components/layout/Seo'
 import SiteHeader from '../components/layout/Header'
 import SiteFooter from '../components/layout/Footer'
@@ -30,36 +31,78 @@ function extractToc(html: string): { id: string; label: string; level: number }[
   return toc
 }
 
+/** 本文の最初の30%を抽出（未ログイン向け） */
+function truncateContent(html: string, pct = 30): string {
+  const textLen = html.replace(/<[^>]+>/g, '').length
+  if (textLen < 200) return html
+  // Split by block-level tags to find cut point
+  const blocks = html.split(/(?=<\/?(?:p|div|h[1-6]|section|ul|ol|table)[^>]*>)/i)
+  let cumulative = 0
+  const threshold = (textLen * pct) / 100
+  const result: string[] = []
+  for (const block of blocks) {
+    const cleanLen = block.replace(/<[^>]+>/g, '').length
+    cumulative += cleanLen
+    if (cumulative > threshold) break
+    result.push(block)
+  }
+  return result.join('')
+}
+
+/** JSON-LD 構造化データ */
+function lessonJsonLd(lesson: any): string {
+  return JSON.stringify({
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: lesson.title,
+    description: lesson.excerpt || `${lesson.title} のSAPレッスン`,
+    datePublished: lesson.created_at,
+    author: { '@type': 'Person', name: 'パンダ先生' },
+    provider: { '@type': 'Organization', name: 'SAP Panda Academy' },
+  })
+}
+
 export default function LessonPage() {
-  const { id } = useParams()
+  const { id, slug } = useParams()
+  const navigate = useNavigate()
   const [lesson, setLesson] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [activeToc, setActiveToc] = useState('')
   const { settings } = useTheme()
   const { user } = useAuth()
+  const isLoggedIn = !!user
   const isAdmin = user?.roles?.includes('administrator')
 
   useEffect(() => {
     if (!id) return
     setLoading(true)
     api.client.get(`/lessons/${id}`).then(({data}) => {
-      if (data.success) setLesson(data.data)
+      if (data.success) {
+        const l = data.data
+        // URLにslugがない、または不一致 → スラグ付きURLにリダイレクト
+        if (!slug && l.slug) {
+          navigate(`/lesson/${id}/${l.slug}`, { replace: true })
+        }
+        setLesson(l)
+      }
     }).catch(() => {}).finally(() => setLoading(false))
-  }, [id])
+  }, [id, slug, navigate])
 
-  const htmlContent = lesson?.content || ''
-  const tocItems = useMemo(() => extractToc(htmlContent), [htmlContent])
+  const fullContent = lesson?.content || ''
+  const isRestricted = !isLoggedIn && !isAdmin
+  const displayContent = isRestricted ? truncateContent(fullContent, 30) : fullContent
+  const tocItems = useMemo(() => extractToc(fullContent), [fullContent])
 
-  // inject id into h2/h3 tags in content
+  // inject id into h2/h3 tags
   const contentWithIds = useMemo(() => {
     let idx = 0
-    return htmlContent.replace(/<h([23])(\s[^>]*)?>/gi, (_m: string, level: string, attrs: string) => {
+    return displayContent.replace(/<h([23])(\s[^>]*)?>/gi, (_m: string, level: string, attrs: string) => {
       const id = `lesson-heading-${idx++}`
       return `<h${level}${attrs || ''} id="${id}">`
     })
-  }, [htmlContent])
+  }, [displayContent])
 
-  // scroll tracking for TOC（getBoundingClientRect で絶対位置を計算）
+  // scroll tracking
   useEffect(() => {
     if (tocItems.length === 0) return
     const onScroll = throttle(() => {
@@ -81,6 +124,7 @@ export default function LessonPage() {
 
   const lessonTitle = lesson?.title || ''
   const lessonExcerpt = lesson?.excerpt || ''
+  const pageUrl = id && lesson?.slug ? `/lesson/${id}/${lesson.slug}` : `/lesson/${id}`
 
   if (loading) return (
     <><Seo title="レッスンを読み込み中" path={`/lesson/${id}`} /><div className="page-bg" /><SiteHeader />
@@ -100,16 +144,19 @@ export default function LessonPage() {
 
   return (
     <>
+      {/* JSON-LD */}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: lessonJsonLd(lesson) }} />
       <Seo
         title={`${lessonTitle} — SAPレッスン`}
         description={lessonExcerpt || `SAP 学習レッスン「${lessonTitle}」。${lesson.time || ''}で学べる実践的な SAP トレーニングコンテンツ。`}
-        path={`/lesson/${id}`}
+        path={pageUrl}
         type="article"
+        publishedTime={lesson.created_at}
         breadcrumbs={[
           { name: 'ホーム', path: '/' },
           { name: 'モジュール', path: '/modules' },
           ...(lesson.course_id ? [{ name: lesson.course_title || 'コース', path: `/course/${lesson.course_id}` }] : []),
-          { name: lessonTitle, path: `/lesson/${id}` },
+          { name: lessonTitle, path: pageUrl },
         ]}
       />
       <div className="page-bg" /><SiteHeader />
@@ -138,12 +185,33 @@ export default function LessonPage() {
 
         <div className="art-body-wrap" style={{ gridTemplateColumns: '1fr 220px' }}>
           <div className="art-content" style={{ minHeight: 200 }}>
-            {htmlContent ? (
+            {displayContent ? (
               <div dangerouslySetInnerHTML={{ __html: contentWithIds }} />
             ) : (
               <div style={{ textAlign: 'center', padding: 60, color: 'var(--ink-3)' }}>
                 <div style={{ fontSize: 48, marginBottom: 12 }}>🎋</div>
                 <p>コンテンツは準備中です。</p>
+              </div>
+            )}
+
+            {/* Auth wall — 未ログイン部分制限 */}
+            {isRestricted && (
+              <div style={{
+                marginTop: 32, padding: '32px 24px', textAlign: 'center',
+                background: 'linear-gradient(135deg, var(--accent-soft) 0%, var(--bg-1) 100%)',
+                borderRadius: 'var(--r-lg)', border: '1.5px solid var(--accent-line)',
+              }}>
+                <div style={{ fontSize: 40, marginBottom: 12 }}>🐼</div>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--ink-0)', margin: '0 0 8px' }}>
+                  続きを読むにはログインが必要です
+                </h3>
+                <p style={{ fontSize: 13, color: 'var(--ink-2)', margin: '0 0 20px', lineHeight: 1.7 }}>
+                  このレッスンの残り内容を表示するには、アカウントにログインしてください。
+                </p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                  <Link to="/login" className="btn accent" style={{ textDecoration: 'none' }}>ログイン</Link>
+                  <Link to="/register" className="btn" style={{ textDecoration: 'none' }}>新規登録</Link>
+                </div>
               </div>
             )}
           </div>

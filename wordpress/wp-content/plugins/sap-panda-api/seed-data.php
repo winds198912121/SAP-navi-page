@@ -996,6 +996,222 @@ echo "固定ページ: {$page_created} 件作成";
 if ($page_skipped > 0) echo ", {$page_skipped} 件スキップ";
 echo "\n";
 
+// ====== NOTES ======
+echo "\n--- 记事生成 ---\n";
+$note_data = [
+    ['title' => 'SAP 学習ロードマップ 2025年版', 'module' => 's4', 'difficulty' => 'beginner',
+     'excerpt' => 'SAP学習を始める方向けのロードマップ。前提知識から学習順序まで、初学者が迷わないための完全ガイド。',
+     'content' => '<h2>はじめに：SAP学習の全体像</h2>
+<p>SAPの世界は広大で、「どこから手をつければいいのかわからない」という声をよく聞きます。本記事では、2025年現在の最新情報をもとに、効率的な学習ロードマップを提供します。</p>
+<p>SAPの学習はマラソンと同じ。最初に全体像を把握し、計画的に進めることが成功の鍵です。</p>
+
+<h2>ステップ0：学習前の準備</h2>
+<p>学習を始める前に、以下の環境を整えましょう。</p>
+<ul>
+<li><strong>SAP Learning Hub</strong> — SAP公式の学習プラットフォーム。無料トライアルあり</li>
+<li><strong>SAP Community</strong> — 世界中のSAPユーザーが集まるフォーラム</li>
+<li><strong>SAP トレーニングシステム</strong> — 実際に操作できる練習環境</li>
+</ul>
+<p>特にSAP Learning Hubは、チュートリアルからハンズオンまで幅広いコンテンツが揃っています。</p>
+
+<h2>ステップ1：基礎知識の習得（1〜2週目）</h2>
+<p>まずはERPの基本概念とSAPの歴史を理解しましょう。</p>
+<h3>このフェーズで学ぶこと</h3>
+<ol>
+<li>ERP（Enterprise Resource Planning）とは何か</li>
+<li>SAPの歴史と市場での位置づけ</li>
+<li>SAP S/4HANAへの移行トレンド</li>
+<li>SAPの主要モジュールの役割</li>
+</ol>
+<p>この段階では、細かいトランザクションコードを覚える必要はありません。「SAPは何をするシステムなのか」という全体像をつかむことが目的です。</p>
+
+<h2>ステップ2：モジュール選択（3週目）</h2>
+<p>SAPには多くのモジュールがあります。自分のキャリア目標に合ったモジュールを選びましょう。</p>
+<table>
+<tr><th>モジュール</th><th>分野</th><th>おすすめの理由</th></tr>
+<tr><td>FI/CO</td><td>財務会計・管理会計</td><td>どの企業でも需要が高く、初心者にも理解しやすい</td></tr>
+<tr><td>MM</td><td>購買・在庫管理</td><td>ロジスティクスの基礎が学べる</td></tr>
+<tr><td>SD</td><td>販売管理</td><td>売上サイクル全体を理解できる</td></tr>
+<tr><td>ABAP</td><td>開発言語</td><td>技術スキルを活かしたい方に</td></tr>
+</table>
+<p>迷ったらFI/COから始めることをおすすめします。会計知識はどのモジュールの基礎にもなります。</p>
+
+<h2>ステップ3：実践学習（4〜8週目）</h2>
+<p>SAP GUIやFioriを使って実際に操作しながら学びます。</p>
+<p>SAP Learning Hubのシステムにアクセスして、実際の画面を操作してみましょう。座学だけでは身につかない「現場感覚」を養うことが重要です。</p>
+<p>このフェーズの学習時間の目安は以下の通りです：</p>
+<ul>
+<li>週3〜5時間の学習時間を確保</li>
+<li>50% 実機操作、30% 座学、20% コミュニティ参加</li>
+<li>毎週、学んだことをNoteにまとめる</li>
+</ul>
+
+<h2>ステップ4：認定資格への挑戦（9〜12週目）</h2>
+<p>学習の集大成として、SAP認定資格に挑戦しましょう。資格取得はキャリアの大きなアドバンテージになります。</p>
+<p><strong>次のステップ：</strong> 資格について詳しく知りたい方は「SAP 資格取得ガイド」を参照してください。</p>'],
+    ['title' => 'SAP 資格取得ガイド', 'module' => 'fi', 'difficulty' => 'intermediate',
+     'excerpt' => 'SAP認定資格の種類と効果的な取得方法を解説。キャリアアップを目指す方は必見。',
+     'content' => '<h2>SAP認定資格とは</h2>
+<p>SAP認定資格は、SAPの知識とスキルを客観的に証明する国際的な資格です。グローバルなIT業界で広く認知されており、SAPコンサルタントへのキャリアパスとして欠かせないものとなっています。</p>
+<p>2025年現在、SAP認定資格は以下の4つのレベルに分類されます：</p>
+
+<h3>アソシエイト（Associate）</h3>
+<p>SAPの基礎知識を証明するエントリーレベルの資格です。各モジュールの基本的な機能と設定を理解していることが求められます。</p>
+<ul>
+<li>対象者：SAP経験1年未満、または学習を完了した方</li>
+<li>試験時間：180分</li>
+<li>出題数：80問</li>
+<li>合格ライン：約65%</li>
+</ul>
+
+<h3>プロフェッショナル（Professional）</h3>
+<p>より深い知識と実務経験を証明する中級レベルの資格です。</p>
+<ul>
+<li>対象者：SAP経験2年以上</li>
+<li>プロジェクトでの実践的な経験が問われる</li>
+<li>ケーススタディ形式の問題が含まれる</li>
+</ul>
+
+<h3>スペシャリスト（Specialist）</h3>
+<p>SAP S/4HANAの特定分野（CLOUD、セキュリティ等）に特化した資格です。</p>
+
+<h3>マスター（Master）</h3>
+<p>SAPの最高峰資格。豊富な経験と深い知識を持つエキスパート向けです。</p>
+
+<h2>おすすめの取得順序</h2>
+<p>初心者の方は以下の順序で資格取得を目指すことをおすすめします：</p>
+<ol>
+<li><strong>SAP Certified Application Associate</strong> — まずは入門資格で基礎を固める</li>
+<li><strong>SAP Certified Technology Professional</strong> — 技術力を証明</li>
+<li><strong>SAP Certified Application Professional</strong> — 高度な知識と経験をアピール</li>
+</ol>
+<p>焦って上位資格を目指すよりも、Associateで基礎をしっかり固めてからステップアップする方が結果的に近道です。</p>
+
+<h2>試験対策のポイント</h2>
+<p>以下の方法で効果的に対策を進めましょう：</p>
+
+<h3>SAP Learning Hub の活用</h3>
+<p>SAP公式の学習プラットフォーム。模擬試験やe-learning、ハンズオン環境が含まれており、効率的な学習が可能です。</p>
+
+<h3>模擬試験の反復</h3>
+<p>出題傾向を掴むには、模擬試験を繰り返し解くことが最も効果的です。間違えた問題は必ず復習し、なぜ間違えたのかを理解しましょう。</p>
+
+<h3>SAP Community での情報収集</h3>
+<p>実際の試験を受けた人の体験談や、最新の試験情報を得ることができます。また、疑問点を質問すれば、経験者が丁寧に回答してくれます。</p>
+
+<h2>よくある質問</h2>
+<h3>Q: 英語の試験は難しいですか？</h3>
+<p>日本語で受験可能な試験もありますが、英語の資料の方が情報量が豊富です。SAPの実務では英語が必要になることも多いため、英語での受験をおすすめします。</p>
+<h3>Q: 資格の有効期限は？</h3>
+<p>SAP認定資格に有効期限はありませんが、SAP製品のバージョンアップに伴い、最新バージョンの資格を取得することを推奨します。</p>'],
+    ['title' => 'Fiori と SAPUI5 の違い', 'module' => 'abap', 'difficulty' => 'beginner',
+     'excerpt' => 'SAP FioriとSAPUI5の関係性をわかりやすく整理。初学者が混乱しがちなこの2つの違いを徹底解説。',
+     'content' => '<h2>はじめに：よくある混乱</h2>
+<p>「FioriとSAPUI5って何が違うの？」これはSAPを学び始めた方から非常によく聞かれる質問です。両者は密接に関連していますが、役割と機能はまったく異なります。</p>
+<p>この記事では、FioriとSAPUI5の違いを、できるだけシンプルに整理します。</p>
+
+<h2>SAP Fiori とは</h2>
+<p><strong>SAP Fiori</strong> は SAP のユーザーエクスペリエンス（UX）製品群の総称です。一言で言えば「SAPの新しいユーザーインターフェース標準」です。</p>
+<h3>Fioriの特徴</h3>
+<ul>
+<li>シンプルで直感的な操作感 — スマホアプリのような使い心地</li>
+<li>ロールベースのデザイン — ユーザーの職種に応じた画面構成</li>
+<li>レスポンシブデザイン — PC・タブレット・スマホ、すべてのデバイスに対応</li>
+<li>2000種類以上の標準アプリが用意されている</li>
+<li>従来のSAP GUIと比較して、学習コストが大幅に低い</li>
+</ul>
+
+<p>Fioriは、従来のSAP GUI（古くからあるSAPの画面）に代わる、モダンで使いやすいインターフェースを提供するための戦略的な取り組みです。</p>
+
+<h2>SAPUI5 とは</h2>
+<p><strong>SAPUI5</strong> は Fiori アプリケーションを開発するためのフレームワーク（開発基盤）です。</p>
+<h3>SAPUI5の特徴</h3>
+<ul>
+<li>HTML5ベースのモダンなWebフレームワーク</li>
+<li>MVVM（Model-View-ViewModel）アーキテクチャを採用</li>
+<li>豊富なUIコンポーネント（ボタン、テーブル、チャート等）を標準装備</li>
+<li>データバインディングにより、少ないコードで高機能なアプリを開発可能</li>
+<li>レスポンシブデザインに対応しており、様々な画面サイズに自動適合</li>
+</ul>
+
+<h2>両者の関係：家と工具の例え</h2>
+<p>両者の関係を理解するのに、家を建てる例えがわかりやすいでしょう。</p>
+<ul>
+<li><strong>Fiori = 家の設計図・デザイン</strong> — 「どんな家を建てるか」のコンセプト部分</li>
+<li><strong>SAPUI5 = 工具・建材</strong> — 実際に家を建てるための道具や材料</li>
+</ul>
+<p>SAPUI5というフレームワークを使って、Fioriのコンセプトに沿ったアプリケーションを開発する——これが正しい理解です。</p>
+
+<h2>開発者から見た違い</h2>
+<h3>Fioriの視点</h3>
+<p>Fioriデザインガイドラインに従ってUIを設計します。画面レイアウト、色使い、動きのパターンなどが細かく定義されています。</p>
+<h3>SAPUI5の視点</h3>
+<p>SAPUI5を使ってコードを書きます。以下のような開発が可能です：</p>
+<pre>&lt;mvc:View controllerName="myApp.controller.Main"&gt;
+    &lt;Page title="{i18n&gt;title}"&gt;
+        &lt;Table items="{/Products}"&gt;
+            &lt;columns&gt;
+                &lt;Column&gt;&lt;Text text="製品名"/&gt;&lt;/Column&gt;
+                &lt;Column&gt;&lt;Text text="価格"/&gt;&lt;/Column&gt;
+            &lt;/columns&gt;
+            &lt;items&gt;
+                &lt;ColumnListItem&gt;
+                    &lt;cells&gt;
+                        &lt;Text text="{ProductName}"/&gt;
+                        &lt;Text text="{Price}"/&gt;
+                    &lt;/cells&gt;
+                &lt;/ColumnListItem&gt;
+            &lt;/items&gt;
+        &lt;/Table&gt;
+    &lt;/Page&gt;
+&lt;/mvc:View&gt;</pre>
+
+<h2>まとめ</h2>
+<table>
+<tr><th>観点</th><th>SAP Fiori</th><th>SAPUI5</th></tr>
+<tr><td>カテゴリ</td><td>UXデザイン戦略</td><td>開発フレームワーク</td></tr>
+<tr><td>役割</td><td>「何を作るか」を定義</td><td>「どう作るか」を提供</td></tr>
+<tr><td>ユーザー</td><td>エンドユーザー向け</td><td>開発者向け</td></tr>
+<tr><td>学習対象</td><td>コンサルタント・企画職</td><td>プログラマー・開発者</td></tr>
+</table>
+<p>SAP FioriとSAPUI5は「車とエンジン」のような関係です。Fioriというコンセプトを、SAPUI5という技術で実現する——この関係を押さえておけば、もう迷うことはありません。</p>'],
+];
+
+$created_notes = 0;
+$skipped_notes = 0;
+foreach ($note_data as $n) {
+    $slug = sanitize_title($n['title']);
+    $exists = get_posts([
+        'post_type' => 'note',
+        'name' => $slug,
+        'post_status' => 'any',
+        'posts_per_page' => 1,
+        'fields' => 'ids',
+    ]);
+    if (!empty($exists)) {
+        echo "  スキップ（既存）: {$n['title']}\n";
+        $skipped_notes++;
+        continue;
+    }
+    $pid = wp_insert_post([
+        'post_type' => 'note',
+        'post_title' => $n['title'],
+        'post_content' => $n['content'],
+        'post_excerpt' => $n['excerpt'],
+        'post_name' => $slug,
+        'post_status' => 'publish',
+        'post_author' => 1,
+    ]);
+    if (is_wp_error($pid)) {
+        echo "  エラー: {$n['title']}\n";
+        continue;
+    }
+    if (!empty($n['module'])) wp_set_object_terms($pid, $n['module'], 'sap_module');
+    if (!empty($n['difficulty'])) wp_set_object_terms($pid, $n['difficulty'], 'difficulty');
+    echo "  ✓ 作成: {$n['title']} (ID: {$pid})\n";
+    $created_notes++;
+}
+
 // 結果表示
 echo "\n=== 完了 ===\n";
 echo "コース: {$created_courses} 件作成";
@@ -1007,4 +1223,7 @@ echo "\n";
 echo "レッスン: {$i} 件作成\n";
 echo "クイズ: {$qi} 件作成\n";
 echo "ナレッジ参照: {$ref_count} 件設定\n";
+echo "记事: {$created_notes} 件作成";
+if ($skipped_notes > 0) echo ", {$skipped_notes} 件スキップ";
+echo "\n";
 echo "\n";

@@ -84,6 +84,7 @@ export interface CourseFormData {
 /** ナレッジ */
 export interface SapKnowledge {
   id: number
+  slug: string
   title: string
   excerpt?: string
   content?: string
@@ -232,14 +233,6 @@ export const LEARNING_PATHS: LearningPath[] = [
     duration: '約 8 週間 · 24 本',
     accent: '#d96570',
   },
-]
-
-export const ARTICLE_DATA = [
-  { mod: 'FI', modLabel: '財務会計', diff: 1, diffLabel: '初級', title: '「仕訳」って結局なに？借方・貸方の覚え方をパンダ先生が一発で解説', excerpt: '簿記の本を読んでも頭に入らない…そんなあなたへ。覚えるべきは「左右がイコール」というたった一つのルールだけ。', author: 'パンダ先生', date: '3日前', mins: 6, views: '12.4k', cover: 'fi', scene: 'class' },
-  { mod: 'ABAP', modLabel: 'ABAP', diff: 2, diffLabel: '中級', title: 'SELECT 文のパフォーマンス改善 — INDEX を使うべき5つの場面', excerpt: '本番環境で動かないコードはコードじゃない。実例コード付きで、明日から効く ABAP の高速化テクニック。', author: 'タナカ', date: '5日前', mins: 12, views: '8.7k', cover: 'abap', scene: 'learning' },
-  { mod: 'MM', modLabel: '購買・在庫', diff: 1, diffLabel: '初級', title: '購買依頼 → 注文 → 入庫 → 請求 — MM の基本フロー完全図解', excerpt: '伝票がどう変わっていくのか、図でつかむ。新人配属時に「これ知ってる前提」とされがちなあの流れ。', author: 'パンダ先生', date: '1週間前', mins: 8, views: '15.2k', cover: 'mm', scene: 'blackboard' },
-  { mod: 'S/4', modLabel: 'S/4HANA', diff: 3, diffLabel: '上級', title: 'ECC からの移行プロジェクト — 失敗パターン7選と対策', excerpt: 'Brownfield か Greenfield か。現役 PM が語る、ふつうの記事には書いてない泥臭い話。', author: 'サトウ', date: '1週間前', mins: 15, views: '9.1k', cover: 's4', scene: 'class' },
-  { mod: 'CO', modLabel: '管理会計', diff: 2, diffLabel: '中級', title: '原価センタと利益センタ、ぶっちゃけ何が違うの？', excerpt: '似てるけど別物。組織構造をどう設計すべきか、現場の意思決定とどう繋がるかを実例で。', author: 'パンダ先生', date: '10日前', mins: 7, views: '6.5k', cover: 'co', scene: 'highfive' },
 ]
 
 export const TOP10 = [

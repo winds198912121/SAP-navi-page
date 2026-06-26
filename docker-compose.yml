@@ -1,61 +1,73 @@
-version: '3.8'
-
 # ============================================================
-# SAP パンダ先生 — Docker Compose（本番環境）
-# Nginx (React + WordPress 同一ポート) + PHP-FPM + MySQL
+# SAP Panda Academy — Docker Compose（本番環境）
+# Nginx (React SPA) + WordPress PHP-FPM + MySQL
+# ============================================================
+# 使用方法:
+#   docker compose up -d --build              # 初回起動
+#   docker compose up -d --build app          # フロントエンドのみ再ビルド
+#   docker compose logs -f                    # ログ確認
+#   docker compose down                       # 停止
 # ============================================================
 
 services:
-  # ---- React ビルド（一時コンテナ） ----
-  admin-react-build:
+  # ---- Nginx + React SPA ----
+  app:
     build:
       context: ./admin-react
       dockerfile: Dockerfile
-      target: builder
-    volumes:
-      - admin-react-dist:/app/dist
-    command: sh -c "cp -r /app/dist/* /dist-output/ 2>/dev/null; cp -r /app/dist /dist-output/"
-    # ビルド完了後、自動終了
-    profiles:
-      - build
-
-  # ---- Nginx（リバースプロキシ + React 静的ファイル配信） ----
-  nginx:
-    image: nginx:latest
-    container_name: sap-panda-nginx
+    image: sap-panda-academy:latest
+    container_name: sap-panda-app
     ports:
-      - "80:80"
-      - "443:443"
+      - "${APP_PORT:-80}:80"
+      - "${APP_PORT_SSL:-443}:443"
     volumes:
-      - ./deploy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
-      - wordpress:/var/www/html:ro
-      - admin-react-dist:/var/www/admin-react/dist:ro
+      # WordPress アセット（Nginx が直接配信する場合に備えてマウント）
+      - wordpress-core:/var/www/html:ro
+      # アップロードファイル（Nginx が直接配信）
+      - ./wordpress/wp-content/uploads:/var/www/html/wp-content/uploads:ro
+      # SSL 証明書
       - ./deploy/ssl:/etc/nginx/ssl:ro
     depends_on:
-      - wordpress
+      wordpress:
+        condition: service_started
     networks:
       - sap-panda-net
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
-  # ---- WordPress（PHP-FPM） ----
+  # ---- WordPress PHP-FPM ----
   wordpress:
     image: wordpress:6-php8.3-fpm
     container_name: sap-panda-wordpress
     volumes:
-      - wordpress:/var/www/html
+      # WordPress コアファイルと wp-content の分離
+      - wordpress-core:/var/www/html
       - ./wordpress/wp-content/plugins:/var/www/html/wp-content/plugins
       - ./wordpress/wp-content/themes:/var/www/html/wp-content/themes
+      - ./wordpress/wp-content/languages:/var/www/html/wp-content/languages
       - ./wordpress/scripts:/scripts:ro
-      - ./wordpress/wp-content/uploads:/var/www/html/wp-content/uploads
+      - ./wordpress/php.ini:/usr/local/etc/php/conf.d/sap-panda.ini:ro
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
-      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD:-wordpress}
       WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_TABLE_PREFIX: wp_
       WORDPRESS_CONFIG_EXTRA: |
-        define('WP_HOME', 'http://localhost');
-        define('WP_SITEURL', 'http://localhost');
+        define('WP_HOME', '${WP_HOME:-http://localhost}');
+        define('WP_SITEURL', '${WP_SITEURL:-http://localhost}');
         define('JWT_AUTH_SECRET_KEY', '${JWT_SECRET:-sap-panda-jwt-secret-key-change-in-production}');
+        define('JWT_AUTH_CORS_ENABLE', true);
+        define('WP_POST_REVISIONS', 5);
+        define('FORCE_SSL_ADMIN', ${FORCE_SSL_ADMIN:-false});
+        define('AUTOMATIC_UPDATER_DISABLED', true);
+        define('WP_AUTO_UPDATE_CORE', false);
+        define('DISALLOW_FILE_EDIT', true);
     depends_on:
       db:
         condition: service_healthy
@@ -70,25 +82,25 @@ services:
     volumes:
       - db_data:/var/lib/mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password_change_in_production}
       MYSQL_DATABASE: wordpress
       MYSQL_USER: wordpress
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-wordpress}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-wordpress}
     ports:
-      - "3307:3306"
+      - "${DB_PORT:-3307}:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
       timeout: 5s
       retries: 10
+      start_period: 30s
     networks:
       - sap-panda-net
     restart: unless-stopped
 
 volumes:
-  wordpress:
+  wordpress-core:
   db_data:
-  admin-react-dist:
 
 networks:
   sap-panda-net:

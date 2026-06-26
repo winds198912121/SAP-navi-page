@@ -36,7 +36,9 @@ const MENU_GROUPS: MenuGroup[] = [
       { path: '/admin/lessons', label: 'レッスン', icon: '📝' },
       { path: '/admin/knowledge', label: 'ナレッジ管理', icon: '📖' },
       { path: '/admin/videos', label: '動画管理', icon: '🎬' },
-      { path: '/admin/quizzes', label: 'クイズ', icon: '❓' },
+      { path: '/admin/quizzes', label: '每日一问', icon: '❓' },
+      { path: '/admin/learning-paths', label: '学習パス', icon: '🎯' },
+      { path: '/admin/notes', label: '记事', icon: '📝' },
     ],
   },
   {

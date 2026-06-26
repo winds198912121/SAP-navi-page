@@ -20,6 +20,7 @@ class SAP_Panda_CPT {
         $this->register_sap_case();
         $this->register_member_plan();
         $this->register_contact_inquiry();
+        $this->register_note();
     }
 
     private function register_contact_inquiry() {
@@ -243,6 +244,27 @@ class SAP_Panda_CPT {
             'menu_icon'         => 'dashicons-portfolio',
             'supports'          => ['title', 'editor'],
             'rewrite'           => ['slug' => 'sap/case'],
+        ]);
+    }
+
+    private function register_note() {
+        register_post_type('note', [
+            'labels' => [
+                'name'          => '记事',
+                'singular_name' => '记事',
+                'add_new_item'  => '新規記事追加',
+                'edit_item'     => '記事編集',
+                'all_items'     => '记事一覧',
+                'not_found'     => '記事がありません。',
+            ],
+            'public'            => true,
+            'show_in_rest'      => true,
+            'menu_icon'         => 'dashicons-edit-page',
+            'supports'          => ['title', 'editor', 'thumbnail', 'excerpt'],
+            'rewrite'           => ['slug' => 'sap/note'],
+            'has_archive'       => true,
+            'capability_type'   => 'post',
+            'map_meta_cap'      => true,
         ]);
     }
 }

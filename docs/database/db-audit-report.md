@@ -29,17 +29,13 @@
 | 4 | `wp_term_relationships` | ✅ 原生 | 1,325 | 80 | 48 | 内容-分类关联 |
 | 5 | `wp_usermeta` | ✅ 原生 | 94 | 16 | 32 | 用户元数据 |
 | 6 | `wp_termmeta` | ✅ 原生 | 54 | 16 | 32 | 分类法元数据 |
-| 7 | `wp_quiz_attempts` | 🔴 **自定义** | 31 | 16 | 32 | 答题记录 |
-| 8 | `wp_terms` | ✅ 原生 | 18 | 16 | 32 | 分类术语 |
-| 9 | `wp_term_taxonomy` | ✅ 原生 | 18 | 16 | 32 | 分类法定义 |
-| 10 | `wp_users` | ✅ 原生 | 5 | 16 | 48 | 用户账号 |
-| 11 | `wp_case_applications` | 🔴 **自定义** | 5 | 16 | 32 | 案件投递 |
-| 12 | `wp_user_points` | 🔴 **自定义** | 3 | 16 | 32 | 用户积分 |
-| 13 | `wp_comments` | ✅ 原生 | 1 | 16 | 80 | 评论 |
-| 14 | `wp_commentmeta` | ✅ 原生 | 0 | 16 | 32 | 评论元数据 |
-| 15 | `wp_links` | ✅ 原生 | 0 | 16 | 16 | 链接管理(旧) |
-| 16 | `wp_learning_progress` | 🔴 **自定义** | 0 | 16 | 16 | 学习进度 |
-| 17 | `wp_reactions` | 🔴 **自定义** | 0 | 16 | 32 | 文章Reaction |
+| 7 | `wp_terms` | ✅ 原生 | 18 | 16 | 32 | 分类术语 |
+| 8 | `wp_term_taxonomy` | ✅ 原生 | 18 | 16 | 32 | 分类法定义 |
+| 9 | `wp_users` | ✅ 原生 | 5 | 16 | 48 | 用户账号 |
+| 10 | `wp_comments` | ✅ 原生 | 1 | 16 | 80 | 评论 |
+| 11 | `wp_commentmeta` | ✅ 原生 | 0 | 16 | 32 | 评论元数据 |
+| 12 | `wp_links` | ✅ 原生 | 0 | 16 | 16 | 链接管理(旧) |
+
 
 ---
 
@@ -95,88 +91,8 @@
 
 ---
 
-## 四、自定义表（5 张 🔴）
+## 四、自定义表
 
-### 🔴 `wp_quiz_attempts` — 答题记录
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | bigint unsigned PK | 主键 |
-| user_id | bigint unsigned | 用户 (INDEX) |
-| quiz_id | bigint unsigned | 题目 (INDEX) |
-| selected_answer | int | 选择的选项 |
-| is_correct | boolean | 是否正确 |
-| attempted_at | datetime | 答题时间 |
-
-**记录：** 31 · **来源：** `sap_panda_create_tables()`
-
----
-
-### 🔴 `wp_case_applications` — 案件投递
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | bigint unsigned PK | 主键 |
-| case_id | bigint unsigned INDEX | 案件 |
-| user_id | bigint unsigned INDEX | 用户(可空) |
-| applicant_name/email/phone | varchar | 联系方式 |
-| expected_rate / experience_years | varchar | 薪资/经验 |
-| skill_modules / self_pr / resume_file | text | 技能/PR/简历 |
-| status | varchar(20) DEFAULT 'pending' | 状态 |
-| created_at / updated_at | datetime | 时间戳 |
-
-**记录：** 5 · **来源：** `sap_panda_create_tables()`
-
----
-
-### 🔴 `wp_user_points` — 积分系统
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | bigint unsigned PK | 主键 |
-| user_id | bigint unsigned INDEX | 用户 |
-| points | int DEFAULT 0 | 积分值 |
-| points_type | varchar(50) INDEX | 类型(daily_login/quiz/read_article) |
-| source_id | bigint unsigned | 来源ID |
-| description | varchar(255) | 说明 |
-| created_at | datetime | 时间 |
-
-**记录：** 3 · **来源：** `sap_panda_create_tables()`
-
----
-
-### 🔴 `wp_reactions` — 文章 Reaction
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | bigint unsigned PK | 主键 |
-| post_id | bigint unsigned INDEX | 文章 |
-| user_id | bigint unsigned | 用户(可空) |
-| reaction_type | varchar(10) | 👍❤🎋🙏 |
-| created_at | datetime | 时间 |
-| **UNIQUE KEY** | (post_id, user_id, reaction_type) | 防止重复 |
-
-**记录：** 0 · **来源：** `sap_panda_create_tables()`
-
----
-
-### 🔴 `wp_learning_progress` — 学习进度
-
-| 字段 | 类型 | 说明 |
-|------|------|------|
-| id | bigint unsigned PK | 主键 |
-| user_id | bigint unsigned | 用户 |
-| path_id | bigint unsigned | 路径 |
-| step_index | int DEFAULT 0 | 当前步骤|
-| completed | boolean DEFAULT FALSE | 完成 |
-| started_at / completed_at | datetime | 时间 |
-| **UNIQUE KEY** | (user_id, path_id) | 每人每路径一条 |
-
-**记录：** 0 · **来源：** `sap_panda_create_tables()`
-
----
-
-## 五、自定义表创建来源
 
 所有 5 张自定义表都在插件的主文件中统一创建：
 
@@ -206,9 +122,4 @@ wp_term_relationships ▍                     80 KB  (1.3%)
 
 | 表名 | 类型 | 数据量 | 活跃度 | 是否需要维护 |
 |------|:----:|:------:|:------:|:----------:|
-| wp_case_applications | 🔴 自定义 | 小 | 🟡 中 | 定期清理旧申请 |
-| wp_learning_progress | 🔴 自定义 | 无 | 🟢 低 | 暂无数据 |
-| wp_quiz_attempts | 🔴 自定义 | 中 | 🟡 中 | 保留学习记录 |
-| wp_reactions | 🔴 自定义 | 无 | 🟢 低 | 暂无数据 |
-| wp_user_points | 🔴 自定义 | 小 | 🟢 低 | 积分系统 |
 | 其余 12 表 | ✅ 原生 | — | — | WordPress 标准维护 |

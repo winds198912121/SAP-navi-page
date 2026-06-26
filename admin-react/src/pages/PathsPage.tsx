@@ -1,6 +1,6 @@
 // ===========================================================
 // 学習パス専用ページ /paths
-// 3列カードグリッド、常時6ステップ表示、詳細画面へリンク
+// 3列カードグリッド、ステップ一覧表示、詳細画面へリンク
 // ===========================================================
 
 import { useState, useEffect } from 'react'
@@ -13,10 +13,14 @@ import { useTheme } from '../hooks/useTheme'
 import api from '../services/api'
 import type { SapModule } from '../types'
 
-interface PathStep { id?: number; title: string; time: string }
+interface StepItem {
+  id?: number; title: string; time: string
+  courses?: any[]; knowledge?: any[]; articles?: any[]; notes?: any[]
+}
+
 interface LearningPath {
   id: number; title: string; audience: string; description: string
-  steps: PathStep[]; duration: string; accent: string
+  steps: StepItem[]; duration: string; accent: string
   article_count: number; cta_url: string; created_at: string; related_articles?: any[]
 }
 
@@ -25,7 +29,6 @@ const ACCENTS = ['#5a9d6e', '#d97548', '#d96570', '#3b82f6', '#8b5cf6', '#ec4899
 
 function PathHero({ paths }: { paths: LearningPath[] }) {
   const total = paths.length
-  const totalArticles = paths.reduce((sum, p) => sum + (p.article_count || 0), 0)
   return (
     <section style={{ background: 'linear-gradient(135deg, var(--accent-soft) 0%, var(--bg-1) 100%)', padding: '48px 28px 40px', borderBottom: '1px solid var(--line-1)' }}>
       <div style={{ maxWidth: 1280, margin: '0 auto' }}>
@@ -37,10 +40,41 @@ function PathHero({ paths }: { paths: LearningPath[] }) {
         <p style={{ fontSize: 15, color: 'var(--ink-2)', lineHeight: 1.8, maxWidth: 560 }}>目的別コースで順番に学べば自然と SAP がわかる。</p>
         <div style={{ display: 'flex', gap: 28, marginTop: 20 }}>
           <div><span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 26, color: 'var(--accent-deep)' }}>{total}</span><span style={{ fontSize: 12, color: 'var(--ink-2)', marginLeft: 4 }}>パス</span></div>
-          <div><span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 26, color: 'var(--accent-deep)' }}>{totalArticles}</span><span style={{ fontSize: 12, color: 'var(--ink-2)', marginLeft: 4 }}>記事</span></div>
+          <div><span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: 26, color: 'var(--accent-deep)' }}>{paths.reduce((s, p) => s + (p.steps?.length || 0), 0)}</span><span style={{ fontSize: 12, color: 'var(--ink-2)', marginLeft: 4 }}>ステップ</span></div>
         </div>
       </div>
     </section>
+  )
+}
+
+function StepRow({ step, accent, index }: { step: StepItem; accent: string; index: number }) {
+  const itemCount = (step.courses?.length || 0) + (step.knowledge?.length || 0) + (step.articles?.length || 0)
+  return (
+    <Link to={step.id ? `/step/${step.id}` : '#'} style={{ textDecoration: 'none', display: 'block' }}>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+        borderRadius: 'var(--r-md)', transition: 'all .12s',
+        background: 'var(--bg-1)', border: '1px solid var(--line-1)',
+        cursor: 'pointer',
+      }}
+        onMouseEnter={e => e.currentTarget.style.borderColor = accent}
+        onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--line-1)'}>
+        <span style={{
+          width: 24, height: 24, borderRadius: '50%', background: accent, color: 'white',
+          fontSize: 10, fontWeight: 700, display: 'grid', placeItems: 'center', flexShrink: 0,
+        }}>{index + 1}</span>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, fontWeight: 500, color: 'var(--ink-0)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{step.title}</div>
+          {itemCount > 0 && (
+            <div style={{ fontSize: 10.5, color: 'var(--ink-3)', marginTop: 1 }}>
+              📚{(step.courses?.length || 0)} 📖{(step.knowledge?.length || 0)} 📰{(step.articles?.length || 0)}
+            </div>
+          )}
+        </div>
+        {step.time && <span style={{ fontSize: 10.5, color: 'var(--ink-3)', fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap' }}>{step.time}</span>}
+        <span style={{ fontSize: 14, color: accent, flexShrink: 0 }}>→</span>
+      </div>
+    </Link>
   )
 }
 
@@ -62,16 +96,17 @@ function PathCard({ path, index }: { path: LearningPath; index: number }) {
         {/* 6 steps */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 14, flex: 1 }}>
           {steps.map((s, j) => (
-            <Link key={j} to={s.id ? `/step/${s.id}` : `/learning/${path.id}`} className="path-step-link">
-              <span style={{ width: 22, height: 22, borderRadius: '50%', background: accent, color: 'white', fontSize: 10, fontWeight: 700, display: 'grid', placeItems: 'center', flexShrink: 0 }}>{j + 1}</span>
-              <span style={{ flex: 1, color: 'var(--ink-0)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', minWidth: 0 }}>{s.title}</span>
-              <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10.5, color: 'var(--ink-3)', whiteSpace: 'nowrap' }}>{s.time}</span>
-            </Link>
+            <StepRow key={j} step={s} accent={accent} index={j} />
           ))}
+          {(path.steps || []).length > MAX_STEPS && (
+            <div style={{ textAlign: 'center', fontSize: 11, color: 'var(--ink-3)', padding: 4 }}>
+              + {(path.steps || []).length - MAX_STEPS} ステップ
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', paddingTop: 12, borderTop: '1px dashed var(--line-2)', marginTop: 'auto' }}>
           <span style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>⏱ {path.duration}</span>
-          <span style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>📄 {path.article_count}記事</span>
+          <span style={{ fontSize: 11.5, color: 'var(--ink-3)' }}>🎯 {(path.steps || []).length}ステップ</span>
           <Link to={`/learning/${path.id}`} style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 14px', borderRadius: 'var(--r-pill)', background: accent, color: 'white', fontSize: 12, fontWeight: 700, textDecoration: 'none', whiteSpace: 'nowrap' }}
             onMouseEnter={e => e.currentTarget.style.opacity = '0.85'} onMouseLeave={e => e.currentTarget.style.opacity = '1'}>
             開始 →

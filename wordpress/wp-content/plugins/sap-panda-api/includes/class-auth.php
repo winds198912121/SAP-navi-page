@@ -26,10 +26,21 @@ class SAP_Panda_Auth {
     }
 
     /**
+     * Get JWT secret key
+     * JWT Authentication for WP REST API プラグインのキーと統一する
+     */
+    private function get_secret_key() {
+        if (defined('JWT_AUTH_SECRET_KEY')) {
+            return JWT_AUTH_SECRET_KEY;
+        }
+        return wp_hash('sap_panda_jwt_secret_' . wp_salt());
+    }
+
+    /**
      * Generate JWT token
      */
     private function generate_token($user_id) {
-        $secret = wp_hash('sap_panda_jwt_secret_' . wp_salt());
+        $secret = $this->get_secret_key();
         $issued = time();
         $expiry = $issued + DAY_IN_SECONDS * 7; // 7 days
 
@@ -38,7 +49,10 @@ class SAP_Panda_Auth {
             'iat' => $issued,
             'nbf' => $issued,
             'exp' => $expiry,
-            'data' => ['user_id' => $user_id],
+            'data' => [
+                'user_id' => $user_id,
+                'user'    => ['id' => $user_id],
+            ],
         ];
 
         // Simple HMAC-based JWT
@@ -55,7 +69,7 @@ class SAP_Panda_Auth {
      * Validate and decode JWT token
      */
     public function validate_token($token) {
-        $secret = wp_hash('sap_panda_jwt_secret_' . wp_salt());
+        $secret = $this->get_secret_key();
         $parts = explode('.', $token);
         if (count($parts) !== 3) return false;
 
@@ -69,7 +83,7 @@ class SAP_Panda_Auth {
         $data = json_decode($this->base64url_decode($payload), true);
         if (!$data || !isset($data['exp']) || $data['exp'] < time()) return false;
 
-        return $data['data']['user_id'] ?? false;
+        return $data['data']['user_id'] ?? ($data['data']['user']['id'] ?? false);
     }
 
     /**
@@ -82,6 +96,13 @@ class SAP_Panda_Auth {
      * - WordPress.com / 共有ホスティング: apache_request_headers()
      */
     public function get_user_id_from_request() {
+        // JWT Authentication for WP REST API プラグインなど、
+        // 外部認証プラグインが既にユーザーを特定している場合はそれを優先する
+        $current_user_id = get_current_user_id();
+        if ($current_user_id > 0) {
+            return $current_user_id;
+        }
+
         $auth = '';
 
         // 1. HTTP_AUTHORIZATION（Apache + Nginx 共通）
@@ -219,6 +240,23 @@ class SAP_Panda_Auth {
             $blogname
         );
         wp_mail($email, $subject, $message);
+
+        // 管理者に新規登録通知
+        $admin_email = get_option('admin_email');
+        $admin_subject = sprintf('[%s] 新規ユーザー登録 — %s', $blogname, $name);
+        $admin_message = sprintf(
+            "【管理者通知】新規ユーザーが登録されました\n\n".
+            "━━━━━━━━━━━━━━━━━━━━\n".
+            "お名前: %s\n".
+            "メールアドレス: %s\n".
+            "登録日時: %s\n".
+            "━━━━━━━━━━━━━━━━━━━━\n\n".
+            "管理画面: %s/wp-admin",
+            $name, $email,
+            wp_date('Y-m-d H:i:s'),
+            get_bloginfo('url')
+        );
+        wp_mail($admin_email, $admin_subject, $admin_message, ['From: ' . $blogname . ' <' . $admin_email . '>']);
 
         return new WP_REST_Response([
             'success' => true,
