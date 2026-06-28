@@ -125,18 +125,9 @@ select.admin-input { min-width: 160px; cursor: pointer; }
   .admin-table-wrap { overflow-x: auto; }
 }
 
-/* ===== HtmlEditor ===== */
+/* ===== HtmlEditor (TipTap) ===== */
 .html-editor { margin-bottom: 8px; border-radius: var(--r-md); overflow: hidden; }
-.html-editor .ql-container { font-family: "Noto Sans JP", system-ui, sans-serif; font-size: 14px; border-bottom-left-radius: 10px; border-bottom-right-radius: 10px; border-color: rgba(60,45,20,0.15); }
-.html-editor .ql-toolbar { border-top-left-radius: 10px; border-top-right-radius: 10px; border-color: rgba(60,45,20,0.15); background: #fcf8ee; }
-.html-editor .ql-editor { min-height: 340px; line-height: 1.85; padding: 14px 16px; }
 
 /* ソースコードエディター（ダークテーマ） */
 .html-editor textarea:focus { outline: none; box-shadow: inset 0 0 0 1px #7aa2f7; }
 .html-editor textarea::placeholder { color: #565f89; }
-
-/* 吹き出し挿入ボタンホバー */
-.html-editor button[dialogBtnLightStyle]:hover {
-  background: var(--accent-soft) !important;
-  border-color: var(--accent) !important;
-}

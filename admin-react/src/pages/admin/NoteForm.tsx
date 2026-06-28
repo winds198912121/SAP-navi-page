@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import api from '../../services/api'
 import { SAP_MODULES } from '../../types'
+import HtmlEditor from '../../components/admin/HtmlEditor'
 
 export default function NoteForm() {
   const { id } = useParams()
@@ -109,7 +110,7 @@ export default function NoteForm() {
 
         <div className="admin-field">
           <label>本文 (HTML)</label>
-          <textarea value={form.content} onChange={e => update('content', e.target.value)} placeholder="<h2>...</h2><p>...</p>" rows={20} style={{ fontFamily: 'monospace', fontSize: 13 }} />
+          <HtmlEditor value={form.content} onChange={v => update('content', v)} placeholder="记事内容を入力..." />
         </div>
 
         <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>

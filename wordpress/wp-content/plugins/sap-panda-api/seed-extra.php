@@ -357,6 +357,7 @@ foreach ($learning_paths as $lp) {
     ];
   }
   update_post_meta($path_id, 'path_steps', $steps_meta);
+  } // end foreach learning_paths
 echo "学習パス: {$created_paths} 件作成（ステップ: {$created_steps} 件）\n\n";
 
 // ----- 5. Learning Progress (demo data) -----
