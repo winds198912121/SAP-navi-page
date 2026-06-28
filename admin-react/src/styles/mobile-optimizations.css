@@ -157,6 +157,9 @@
   .art-content { font-size: 14px; }
   .art-content h2 { font-size: 20px; margin: 28px 0 12px; }
   .dialog { grid-template-columns: 48px 1fr; gap: 10px; }
+  .dialog .av { width: 48px; }
+  .dialog .av > svg,
+  .dialog .av > img { width: 48px; height: 48px; max-width: none; }
   .dialog .bubble { font-size: 13px; padding: 10px 14px; }
 }
 @media (max-width: 639px) {

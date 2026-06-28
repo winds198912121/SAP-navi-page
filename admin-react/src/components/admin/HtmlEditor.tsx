@@ -173,10 +173,10 @@ export default function HtmlEditor({ value: initialValue, onChange, placeholder 
   // ========== Dialog insertion ==========
   const insertDialog = useCallback((who: 'panda' | 'taro') => {
     if (!editor) return
-    editor.chain().focus().insertContent({
-      type: 'dialog',
-      attrs: { who, text: '' },
-    }).run()
+    const { selection } = editor.state
+    const node = editor.schema.nodes.dialog?.create({ who, text: '' })
+    if (!node) return
+    editor.chain().focus().insertContentAt(selection.head, node).run()
   }, [editor])
 
   // ========== Link insertion ==========
