@@ -4,8 +4,11 @@
 
 | 文件 | 大小 | 说明 |
 |------|------|------|
-| `sap-panda-theme.zip` | 3.0 MB | WordPress 主题（React SPA 前端） |
-| `sap-panda-api.zip` | 96 KB | WordPress 插件（REST API + 自定义文章类型） |
+| `sap-panda-theme.zip` | ~3 MB | WordPress 主题（React SPA 前端） |
+| `sap-panda-api.zip` | ~100 KB | WordPress 插件（REST API + 自定义文章类型） |
+| `sap-panda-academy.zip` | ~1.5 MB | SSR 服务端运行环境（Node.js SSR bundle） |
+
+> **SSR（服务端渲染）v2.4** — 新增爬虫搜索引擎支持，Googlebot 等爬虫可获得完整 HTML 内容。
 
 ---
 
@@ -14,8 +17,10 @@
 ### 前提条件
 
 - WordPress 6.0+
-- PHP 7.4+（推荐 8.0+）
+- PHP 8.0+（推荐 8.3）
 - MySQL 8.0+
+- Node.js 20 LTS（SSR 需要）
+- PM2（SSR 进程管理）
 - 已安装并启用插件：
   - Advanced Custom Fields (ACF)
   - Custom Post Type UI
@@ -29,7 +34,6 @@
 
 或手动安装：
 ```bash
-# 解压到 WordPress 插件目录
 unzip sap-panda-api.zip -d /path/to/wordpress/wp-content/plugins/
 ```
 
@@ -41,34 +45,93 @@ unzip sap-panda-api.zip -d /path/to/wordpress/wp-content/plugins/
 
 或手动安装：
 ```bash
-# 解压到 WordPress 主题目录
 unzip sap-panda-theme.zip -d /path/to/wordpress/wp-content/themes/
 ```
 
-### 3. 配置
-
-#### JWT 认证
-
-在 `wp-config.php` 中添加：
+### 3. 配置 wp-config.php
 
 ```php
 define('JWT_AUTH_SECRET_KEY', 'your-secret-key-here');
 define('JWT_AUTH_CORS_ENABLE', true);
-```
-
-#### WordPress 地址
-
-```php
 define('WP_HOME', 'https://your-domain.com');
 define('WP_SITEURL', 'https://your-domain.com');
 ```
 
-### 4. 导入种子数据（可选）
+### 4. 配置 Nginx（SSR 版）
 
-插件启用后，访问以下 URL 导入示例数据：
+部署包包含生产级 Nginx 配置，内置爬虫检测 + SSR 代理：
 
+```nginx
+# 从项目复制到 Nginx 配置目录
+sudo cp deploy/nginx/production.conf /etc/nginx/sites-available/sap-panda
+sudo ln -s /etc/nginx/sites-available/sap-panda /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
 ```
-https://your-domain.com/wp-admin/admin.php?page=sap-panda-seed
+
+配置要点：
+- **爬虫检测** — 根据 User-Agent 识别 Googlebot/Bingbot/Facebook 等
+- **SSR 代理** — 爬虫请求转发到 Node.js SSR 服务 (port 3000)
+- **SPA 回退** — 普通用户继续使用客户端渲染
+
+---
+
+## SSR（服务端渲染）部署
+
+### 首次安装（一次性）
+
+```bash
+# 1. SSH 到服务器
+ssh root@your-server.com
+
+# 2. 运行 SSR 环境设置脚本（安装 Node.js + PM2）
+bash < <(curl -s https://raw.githubusercontent.com/winds198912121/SAP-navi-page/main/deploy/scripts/setup-ssr.sh)
+
+# 或手动安装
+curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+apt-get install -y nodejs
+npm install -g pm2
+mkdir -p /opt/sap-panda-ssr
+pm2 startup systemd
+```
+
+### 日常部署（SSR bundle 更新）
+
+```bash
+# 1. 本地构建
+cd admin-react && npm run build:ssr
+
+# 2. 部署 SSR bundle 到服务器
+rsync -avz dist/server/ root@server:/opt/sap-panda-ssr/dist/server/
+rsync -avz dist/client/index.html root@server:/opt/sap-panda-ssr/dist/client/
+rsync -avz server/ root@server:/opt/sap-panda-ssr/server/
+
+# 3. 重启 SSR 服务
+ssh root@server "pm2 restart sap-panda-ssr && pm2 save"
+```
+
+### 一键部署（推荐）
+
+配置 `deploy/config/remote.env` 后运行：
+
+```bash
+bash deploy/scripts/deploy-remote.sh
+```
+
+该脚本会：
+1. 构建 CSR + SSR 双 bundle
+2. 部署 WordPress 插件和主题
+3. 部署 SSR 服务端文件
+4. 通过 PM2 重启 SSR 服务
+5. 自动修正文件权限
+
+### 验证 SSR 是否生效
+
+```bash
+# 普通用户（应返回空 <div id="root"></div>）
+curl -s -H 'User-Agent: Mozilla/5.0' https://your-domain.com/ | grep '<div id="root">'
+
+# 爬虫（应返回完整 HTML 内容）
+curl -s -H 'User-Agent: Googlebot/2.1' https://your-domain.com/ | grep '<div id="root">' | head -c 100
 ```
 
 ---
@@ -77,7 +140,7 @@ https://your-domain.com/wp-admin/admin.php?page=sap-panda-seed
 
 | 路径 | 说明 |
 |------|------|
-| `/` | React SPA 前端 |
+| `/` | React SPA 前端（普通用户） / SSR HTML（爬虫） |
 | `/wp-admin/` | WordPress 管理后台 |
 | `/wp-json/sap/v1/` | REST API |
 
@@ -95,27 +158,7 @@ https://your-domain.com/wp-admin/admin.php?page=sap-panda-seed
 | POST | `/wp-json/sap/v1/auth/login` | 用户登录 |
 | GET | `/wp-json/sap/v1/user/me` | 当前用户信息 |
 
----
-
-## Nginx 配置参考
-
-部署到生产服务器时，参考以下 Nginx 配置要点：
-
-```nginx
-# React SPA 路由回退
-location / {
-    try_files $uri $uri/ /index.html;
-}
-
-# API 反向代理到 PHP-FPM
-location /wp-json/ {
-    proxy_pass http://wordpress_php;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-}
-```
-
-详细配置见 `deploy/nginx/` 目录。
+完整 API 列表见 `docs/api_list.csv`。
 
 ---
 
@@ -126,12 +169,26 @@ sap-panda/
 ├── assets/
 │   ├── index-{hash}.js      # React 主程序
 │   └── index-{hash}.css     # React 样式
-├── functions.php             # 主题函数（加载 JS/CSS）
+├── functions.php             # 主题函数（加载 JS/CSS + SSR 辅助函数）
 ├── index.html                # SPA 入口
-├── index.php                 # WordPress 模板
+├── index.php                 # WordPress 模板（SSR 降级检测）
 ├── style.css                 # 主题信息
 ├── robots.txt                # 搜索引擎配置
 └── sitemap.xml               # 站点地图
+```
+
+## 目录结构（SSR）
+
+```
+/opt/sap-panda-ssr/
+├── dist/
+│   ├── client/
+│   │   └── index.html        # SPA shell 模板
+│   └── server/
+│       └── entry-server.js   # SSR 渲染函数
+├── server/
+│   └── index.js              # Express SSR 服务器
+└── node_modules/             # 运行时依赖
 ```
 
 ---
@@ -142,6 +199,17 @@ sap-panda/
 - 确认主题已启用
 - 检查 Nginx 配置是否有 SPA 路由回退 (`try_files $uri $uri/ /index.html;`)
 - 检查浏览器控制台是否有 API 请求错误
+
+**Q: SSR 不工作 / 爬虫拿到的也是空 HTML？**
+- 确认 Node.js SSR 服务运行中: `pm2 list`
+- 检查 SSR 端口: `curl -s http://127.0.0.1:3000/health`
+- 检查 Nginx error log: `tail -f /var/log/nginx/sap-panda-error.log`
+- 确认 `production.conf` 中 SSR `@ssr` location 配置正确
+
+**Q: SSR 返回 502？**
+- SSR 进程未运行: `pm2 restart sap-panda-ssr`
+- 端口冲突: 检查 3000 端口是否被占用
+- 依赖缺失: 确认 `node_modules` 已安装
 
 **Q: API 返回 401？**
 - JWT 密钥未配置，检查 `wp-config.php` 中 `JWT_AUTH_SECRET_KEY`
