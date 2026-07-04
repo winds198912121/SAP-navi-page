@@ -69,12 +69,28 @@ else
     exit 1
 fi
 
+# ----- SSR Server (共通) -----
+SSR_DIR="$ADMIN_DIR/server"
+if [ -f "$SSR_DIR/index.js" ]; then
+    kill $(lsof -ti:3000 2>/dev/null) 2>/dev/null || true
+    cd "$ADMIN_DIR"
+    SSR_ENABLED=1 SSR_HOST=localhost SSR_PORT=3000 node server/index.js >/tmp/sap-panda-ssr.log 2>&1 &
+    sleep 2
+    if curl -s -o /dev/null "http://localhost:3000/health" 2>/dev/null; then
+        echo "  ✅ SSR Server : http://localhost:3000"
+    else
+        echo "  ⚠️  SSR Server skipped (check /tmp/sap-panda-ssr.log)"
+    fi
+else
+    echo "  ⏭ SSR server skipped"
+fi
+
 # ----- 本番モード: Nginx (80) + React build + WordPress (8081) -----
 if [ "$MODE" = "prod" ]; then
-    echo "[3/4] Building React for production..."
+    echo "[3/4] Building React for production (CSR + SSR)..."
     cd "$ADMIN_DIR"
     bash build.sh 2>&1 | tail -5
-    echo "  ✅ React build complete"
+    echo "  ✅ React build complete (client + server)"
 
     echo "[4/4] Reloading Nginx..."
     echo "  ⏳ Trying with sudo (requires password)..."
@@ -107,6 +123,7 @@ if [ "$MODE" = "prod" ]; then
     echo "  Site      : http://localhost"
     echo "  WordPress : http://localhost/wp-admin"
     echo "  API       : http://localhost/wp-json/sap/v1/"
+    echo "  SSR       : http://localhost:3000 (internal)"
     echo "================================================"
     exit 0
 fi
@@ -131,7 +148,5 @@ echo "  WordPress : http://localhost:8081"
 echo "  Admin     : http://localhost:8081/wp-admin"
 echo "  API       : http://localhost:8081/wp-json/sap/v1/"
 echo "  Frontend  : http://localhost:5173"
-echo ""
-echo "  Username  : admin"
-echo "  Password  : admin123"
+echo "  SSR       : http://localhost:3000"
 echo "================================================"

@@ -11,6 +11,8 @@ const DEFAULT: ThemeSettings = {
 }
 
 function load(): ThemeSettings {
+  // SSR 時は window / localStorage が利用不可
+  if (typeof window === 'undefined') return DEFAULT
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     return raw ? { ...DEFAULT, ...JSON.parse(raw) } : DEFAULT

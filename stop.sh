@@ -16,6 +16,9 @@ kill $(lsof -ti:8080 2>/dev/null) 2>/dev/null && echo "  ✅ WordPress stopped" 
 # Stop Vite dev server
 kill $(lsof -ti:5173 2>/dev/null) 2>/dev/null && echo "  ✅ Frontend stopped" || echo "  ⚠️  Frontend not running"
 
+# Stop SSR server
+kill $(lsof -ti:3000 2>/dev/null) 2>/dev/null && echo "  ✅ SSR server stopped" || echo "  ⚠️  SSR server not running"
+
 # Stop MySQL
 MYSQL_SOCK="/tmp/sap-panda.sock"
 if [ -S "$MYSQL_SOCK" ]; then

@@ -30,11 +30,11 @@ fi
 
 # 2. React ビルド
 echo ""
-echo "[2/4] Building React frontend..."
+echo "[2/4] Building React frontend + SSR..."
 cd "$PROJECT_DIR/admin-react"
 npm ci
-npm run build
-echo "  ✅ React build complete (dist/)"
+npm run build:ssr
+echo "  ✅ React build complete (dist/client/ + dist/server/)"
 
 # 3. Nginx 設定テスト
 echo ""
@@ -55,8 +55,28 @@ echo "[4/4] Reloading Nginx..."
 sudo nginx -s reload 2>/dev/null || sudo nginx 2>/dev/null || echo "  ⚠️  Start nginx manually: sudo nginx"
 echo "  ✅ Nginx reloaded"
 
+# 5. SSR サーバー (PM2 管理)
+echo ""
+echo "[5/4] Managing SSR server..."
+if command -v pm2 &> /dev/null; then
+    if pm2 describe sap-panda-ssr &>/dev/null; then
+        pm2 restart sap-panda-ssr --update-env
+    else
+        pm2 start "$PROJECT_DIR/admin-react/server/index.js" \
+            --name sap-panda-ssr --time \
+            --env PORT=3000
+    fi
+    pm2 save
+    echo "  ✅ SSR server managed by PM2"
+else
+    echo "  ⚠️  PM2 not found. SSR server not started."
+    echo "     Install: npm install -g pm2"
+    echo "     Start:   cd admin-react && node server/index.js"
+fi
+
 echo ""
 echo "===================================="
 echo "  ✅ Deploy complete!"
 echo "  Site : http://localhost"
+echo "  SSR  : http://localhost:3000 (internal)"
 echo "===================================="

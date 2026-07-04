@@ -11,6 +11,12 @@
 // -----------------------------------------------------------
 define( 'SAP_PANDA_VERSION', '1.0.0' );
 
+// SSR (サーバーサイドレンダリング) 設定
+// SSR_ENABLED=1 で有効化。Docker 環境では compose の環境変数で制御。
+define( 'SAP_SSR_ENABLED', in_array( getenv( 'SSR_ENABLED' ), array( '1', 'true', 'yes' ), true ) );
+define( 'SAP_SSR_HOST', getenv( 'SSR_HOST' ) ?: 'ssr' );    // Docker 内部では ssr:3000
+define( 'SAP_SSR_PORT', getenv( 'SSR_PORT' ) ?: '3000' );
+
 // -----------------------------------------------------------
 //  アセットのエンキュー
 // -----------------------------------------------------------
@@ -209,4 +215,118 @@ function sap_panda_admin_bar_fix(): void {
 	}
 	</style>
 	<?php
+}
+
+
+// -----------------------------------------------------------
+//  SSR (サーバーサイドレンダリング) — クローラー支援
+// -----------------------------------------------------------
+
+/**
+ * 現在の User-Agent が検索エンジンクローラーかどうかを判定する。
+ *
+ * @return bool クローラーの場合は true。
+ */
+function sap_panda_is_bot(): bool {
+	$ua = $_SERVER['HTTP_USER_AGENT'] ?? '';
+
+	// 一般的なクローラー / ボットのパターン
+	$bot_patterns = array(
+		'googlebot',
+		'bingbot',
+		'yandexbot',
+		'baiduspider',
+		'facebookexternalhit',
+		'twitterbot',
+		'whatsapp',
+		'slurp',
+		'bot',
+		'crawl',
+		'spider',
+		'yahoo! slurp',
+		'seznambot',
+		'pinterest',
+		'discordbot',
+		'slackbot',
+		'telegrambot',
+		'applebot',
+		'duckduckbot',
+	);
+
+	foreach ( $bot_patterns as $pattern ) {
+		if ( stripos( $ua, $pattern ) !== false ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Node.js SSR サーバーにリクエストし、レンダリング済み HTML を取得する。
+ *
+ * @return string|null 成功時は <div id="root"> 内の HTML 文字列、失敗時は null。
+ */
+function sap_panda_fetch_ssr(): ?string {
+	// 現在のリクエストパス（クエリ文字列除く、フルパスで SSR に渡す）
+	$request_path = parse_url( $_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH );
+
+	// WordPress 設置パス（例: /sap）。StaticRouter の basename として使用
+	$wp_path = rtrim( parse_url( home_url(), PHP_URL_PATH ) ?: '', '/' );
+
+	// SSR サーバーの URL
+	// path パラメータ = フルパス (例: /sap/courses/123)
+	// basename パラメータ = WordPress 設置パス (例: /sap)
+	// StaticRouter が basename を自動除去してルーティングする
+	$ssr_url = add_query_arg(
+		array(
+			'path'     => $request_path,
+			'basename' => $wp_path,
+		),
+		sprintf(
+			'http://%s:%s/render',
+			SAP_SSR_HOST,
+			SAP_SSR_PORT
+		)
+	);
+
+	$response = wp_remote_get( $ssr_url, array(
+		'timeout'   => 10,
+		'headers'   => array(
+			'Accept' => 'application/json',
+		),
+	) );
+
+	if ( is_wp_error( $response ) ) {
+		error_log(
+			sprintf(
+				'[SSR] Request failed: %s (url: %s)',
+				$response->get_error_message(),
+				$ssr_url
+			)
+		);
+		return null;
+	}
+
+	$status = wp_remote_retrieve_response_code( $response );
+	if ( 200 !== $status ) {
+		error_log(
+			sprintf(
+				'[SSR] Unexpected status: %d (url: %s)',
+				$status,
+				$ssr_url
+			)
+		);
+		return null;
+	}
+
+	$body = wp_remote_retrieve_body( $response );
+	$data = json_decode( $body, true );
+
+	if ( ! is_array( $data ) || ! isset( $data['html'] ) ) {
+		error_log( '[SSR] Invalid response: ' . substr( $body, 0, 200 ) );
+		return null;
+	}
+
+	return $data['html'];
 }

@@ -13,18 +13,16 @@ services:
   # ---- Nginx + React SPA ----
   app:
     build:
-      context: ./admin-react
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: admin-react/Dockerfile
     image: sap-panda-academy:latest
     container_name: sap-panda-app
     ports:
       - "${APP_PORT:-80}:80"
       - "${APP_PORT_SSL:-443}:443"
     volumes:
-      # WordPress アセット（Nginx が直接配信する場合に備えてマウント）
+      # WordPress アセット（wordpress-core volume から読み取り専用マウント）
       - wordpress-core:/var/www/html:ro
-      # アップロードファイル（Nginx が直接配信）
-      - ./wordpress/wp-content/uploads:/var/www/html/wp-content/uploads:ro
       # SSL 証明書
       - ./deploy/ssl:/etc/nginx/ssl:ro
     depends_on:
@@ -52,6 +50,7 @@ services:
       - ./wordpress/wp-content/languages:/var/www/html/wp-content/languages
       - ./wordpress/scripts:/scripts:ro
       - ./wordpress/php.ini:/usr/local/etc/php/conf.d/sap-panda.ini:ro
+      - ./wordpress/php-fpm-override.conf:/usr/local/etc/php-fpm.d/zz-sap-panda.conf:ro
     environment:
       WORDPRESS_DB_HOST: db:3306
       WORDPRESS_DB_USER: wordpress
@@ -68,12 +67,45 @@ services:
         define('AUTOMATIC_UPDATER_DISABLED', true);
         define('WP_AUTO_UPDATE_CORE', false);
         define('DISALLOW_FILE_EDIT', true);
+      SSR_ENABLED: ${SSR_ENABLED:-1}
+      SSR_HOST: ssr
+      SSR_PORT: 3000
     depends_on:
       db:
         condition: service_healthy
     networks:
       - sap-panda-net
     restart: unless-stopped
+
+  # ---- SSR Server (Node.js 渲染服务) ----
+  ssr:
+    build:
+      context: .
+      dockerfile: admin-react/Dockerfile.ssr
+    image: sap-panda-ssr:latest
+    container_name: sap-panda-ssr
+    environment:
+      PORT: 3000
+      # WordPress 設置パス。空文字の場合はルート、/sap の場合は /sap
+      SITE_BASE: ${SITE_BASE:-}
+      # API ベース URL（デフォルトは自動構築）
+      API_BASE: ${API_BASE:-}
+      # 本番 = 1 で SSR 有効。開発では 0 にすると SSR をスキップ
+      SSR_ENABLED: ${SSR_ENABLED:-1}
+    ports:
+      - "${SSR_PORT:-3000}:3000"
+    depends_on:
+      wordpress:
+        condition: service_started
+    networks:
+      - sap-panda-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
   # ---- MySQL ----
   db:

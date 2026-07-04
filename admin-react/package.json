@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "tsc && vite build --outDir dist/client",
+    "build:ssr": "tsc && vite build --outDir dist/client && vite build --ssr src/entry-server.tsx --outDir dist/server",
     "preview": "vite preview",
+    "start:ssr": "node server/index.js",
     "test": "vitest"
   },
   "dependencies": {
@@ -25,6 +27,7 @@
     "@tiptap/react": "^3.27.1",
     "@tiptap/starter-kit": "^3.27.1",
     "axios": "^1.7.0",
+    "express": "^5.2.1",
     "lowlight": "^3.3.0",
     "marked": "^18.0.5",
     "react": "^18.3.1",
@@ -37,6 +40,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/marked": "^5.0.2",
+    "@types/node": "^26.0.1",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

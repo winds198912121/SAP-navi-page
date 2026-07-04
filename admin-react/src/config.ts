@@ -15,11 +15,15 @@
  *   p('/')          →  '/sap/'         (本番)  /  '/'          (ローカル)
  */
 
-// WordPress の wp_localize_script から渡されるデータ
-const SAP_PANDA_DATA = (window as any).SAP_PANDA_DATA
+// WordPress の wp_localize_script から渡されるデータ（SSR 時は undefined）
+const SAP_PANDA_DATA = typeof window !== 'undefined' ? (window as any).SAP_PANDA_DATA : undefined
 
 /** WordPress 設置サブディレクトリ（例: /sap, /wordpress, ''） */
 export const SITE_BASE: string = (() => {
+  // SSR 時は環境変数から取得
+  if (typeof window === 'undefined') {
+    return process.env.SITE_BASE || ''
+  }
   // SAP_PANDA_DATA から wpUrl のパス部分を抽出
   if (SAP_PANDA_DATA?.wpUrl) {
     try {
@@ -34,8 +38,15 @@ export const SITE_BASE: string = (() => {
 })()
 
 /** REST API ベース URL */
-export const API_BASE: string = SAP_PANDA_DATA?.restUrl?.replace(/\/+$/, '')
-  || (SITE_BASE ? `${SITE_BASE}/wp-json/sap/v1` : '/wp-json/sap/v1')
+export const API_BASE: string = (() => {
+  if (typeof window === 'undefined') {
+    return process.env.API_BASE || (process.env.SITE_BASE
+      ? `${process.env.SITE_BASE}/wp-json/sap/v1`
+      : '/wp-json/sap/v1')
+  }
+  return SAP_PANDA_DATA?.restUrl?.replace(/\/+$/, '')
+    || (SITE_BASE ? `${SITE_BASE}/wp-json/sap/v1` : '/wp-json/sap/v1')
+})()
 
 /**
  * SITE_BASE を自動付与したページパスを返す。
