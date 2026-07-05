@@ -18,12 +18,6 @@ async function AdminLessons() {
           </tr>
         ))}</tbody>
       </table>
-      <style jsx>{`
-        .admin-table { width: 100%; border-collapse: collapse; background: var(--color-bg-card); border-radius: var(--radius-lg); overflow: hidden; }
-        .admin-table th { text-align: left; padding: var(--spacing-sm) var(--spacing-md); background: var(--color-bg); font-size: var(--text-xs); font-weight: 700; color: var(--color-text-lighter); border-bottom: 1px solid var(--color-border); }
-        .admin-table td { padding: var(--spacing-sm) var(--spacing-md); border-bottom: 1px solid var(--color-border-light); font-size: var(--text-sm); }
-        .actions { display: flex; gap: var(--spacing-xs); }
-      `}</style>
     </>
   );
 }

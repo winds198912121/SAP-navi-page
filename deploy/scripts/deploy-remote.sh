@@ -102,6 +102,13 @@ eval rsync $RSYNC_OPTS \
   "$PROJECT_DIR/wordpress/wp-content/themes/sap-panda/" \
   "$SERVER:$REMOTE_WP_PATH/wp-content/themes/sap-panda/"
 echo "  ✅ Theme deployed"
+
+# オプション: Aladdin 標準テーマもデプロイする場合（コメント解除）
+# echo "[4b] Deploying aladdin theme (standard PHP)..."
+# eval rsync $RSYNC_OPTS \
+#   "$PROJECT_DIR/aladdin_theme/" \
+#   "$SERVER:$REMOTE_WP_PATH/wp-content/themes/aladdin/"
+# echo "  ✅ Aladdin theme deployed"
 echo ""
 
 # --------------------------------------------------

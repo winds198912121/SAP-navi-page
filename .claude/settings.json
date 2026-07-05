@@ -1,6 +1,6 @@
 {
   "env": {
-    "ANTHROPIC_AUTH_TOKEN": "sk-aa39ee878cd34c6cab463906e0784e92",
+    "ANTHROPIC_AUTH_TOKEN": "sk-0c8df08572a046ccb8270843a06bde04",
     "ANTHROPIC_BASE_URL": "https://api.deepseek.com/anthropic",
     "ANTHROPIC_MODEL": "deepseek-chat",
     "ANTHROPIC_DEFAULT_OPUS_MODEL": "deepseek-reasoner",
