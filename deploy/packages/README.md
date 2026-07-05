@@ -7,8 +7,14 @@
 | `sap-panda-theme.zip` | ~3 MB | WordPress 主题（React SPA 前端） |
 | `sap-panda-api.zip` | ~100 KB | WordPress 插件（REST API + 自定义文章类型） |
 | `sap-panda-academy.zip` | ~1.5 MB | SSR 服务端运行环境（Node.js SSR bundle） |
+| `aladdin-theme.zip` | ~74 KB | WordPress 主题（标准PHP版 — 非React，共享同一REST API） |
+| `sap-panda-next.zip` | ~71 KB | Next.js SSR App（源码包，需 `npm install && npm run build`） |
 
 > **SSR（服务端渲染）v2.4** — 新增爬虫搜索引擎支持，Googlebot 等爬虫可获得完整 HTML 内容。
+>
+> **Aladdin 主题 v1.0** — 标准 WordPress 主题版，适合传统 PHP 模板需求，与 React SPA 共享 `/wp-json/sap/v1/` API。
+>
+> **Next.js 版 v1.0** — 基于 App Router 的全 SSR 方案，天然支持 SEO。与 React SPA / Aladdin 共享同一 API。
 
 ---
 
@@ -37,7 +43,7 @@
 unzip sap-panda-api.zip -d /path/to/wordpress/wp-content/plugins/
 ```
 
-### 2. 安装主题
+### 2. 安装主题 (React SPA)
 
 1. WordPress 管理后台 → **外观** → **主题** → **安装主题** → **上传主题**
 2. 选择 `sap-panda-theme.zip` → **立即安装**
@@ -46,6 +52,56 @@ unzip sap-panda-api.zip -d /path/to/wordpress/wp-content/plugins/
 或手动安装：
 ```bash
 unzip sap-panda-theme.zip -d /path/to/wordpress/wp-content/themes/
+```
+
+### 2b. 安装主题 (Aladdin 标准PHP版)
+
+> 如果不需要 React SPA，可以安装 Aladdin 主题。两者共享同一套 REST API 数据。
+
+1. WordPress 管理后台 → **外观** → **主题** → **安装主题** → **上传主题**
+2. 选择 `aladdin-theme.zip` → **立即安装**
+3. 安装完成后点击 **启用**（Aladdin SAP Panda）
+
+或手动安装：
+```bash
+unzip aladdin-theme.zip -d /path/to/wordpress/wp-content/themes/
+cd /path/to/wordpress/wp-content/themes/
+# aladdin_theme 目录 -> 移动到 themes 根目录
+mv aladdin_theme aladdin
+```
+
+### 2c. 安装 Next.js 版
+
+> 需要 Node.js 20 LTS+。Next.js 全 SSR，天然 SEO 友好。
+
+```bash
+# 1. 解压到服务器
+unzip sap-panda-next.zip -d /opt/
+cd /opt/react_next
+
+# 2. 配置环境
+cp .env.example .env.local
+# 编辑 .env.local 设置 WordPress 地址
+
+# 3. 安装依赖并构建
+npm install
+npm run build
+
+# 4. 使用 PM2 启动
+npm install -g pm2
+pm2 start npm --name sap-panda-next -- start
+pm2 save
+
+# 5. Nginx 反向代理配置
+# location / {
+#     proxy_pass http://127.0.0.1:3000;
+#     proxy_set_header Host $host;
+# }
+```
+
+一键部署（配置 `deploy/config/remote.env` 后）：
+```bash
+bash deploy/scripts/deploy-nextjs.sh
 ```
 
 ### 3. 配置 wp-config.php
@@ -191,6 +247,49 @@ sap-panda/
 └── node_modules/             # 运行时依赖
 ```
 
+## 目录结构（Aladdin 标准主题）
+
+```
+aladdin/
+├── style.css                   # 主题信息
+├── functions.php               # 主题函数、API 辅助、路由
+├── header.php                  # 网站头部
+├── footer.php                  # 网站底部
+├── index.php                   # 默认模板
+├── 404.php                     # 404 页面
+├── assets/
+│   ├── css/
+│   │   ├── main.css            # 主样式 (设计系统 CSS 变量)
+│   │   ├── responsive.css      # 响应式适配
+│   │   └── admin.css           # 管理后台样式
+│   ├── js/
+│   │   └── main.js             # JavaScript (API 调用、交互)
+│   └── images/                 # 图片资源
+├── page-templates/
+│   ├── home.php                # 首页
+│   ├── single-article.php      # 文章详情
+│   ├── single-course.php       # 课程详情
+│   ├── single-lesson.php       # 课时详情
+│   ├── single-knowledge.php    # 知识库详情
+│   ├── single-note.php         # 笔记详情
+│   ├── single-step.php         # 学习步骤
+│   ├── single-learning-path.php# 学习路径详情
+│   ├── archive-articles.php    # 模块文章列表
+│   ├── archive-modules.php     # SAP 模块列表
+│   ├── archive-cases.php       # 案件列表
+│   ├── archive-videos.php      # 视频列表
+│   ├── archive-learning-paths.php # 学习路径列表
+│   ├── search-page.php         # 搜索页面
+│   ├── login.php               # 登录
+│   ├── register.php            # 注册
+│   ├── profile.php             # 个人资料
+│   ├── membership.php          # 会员计划
+│   ├── quiz-page.php           # 每日一题
+│   ├── topic-page.php          # 主题页面
+│   ├── admin/                  # 管理后台模板 (18个)
+│   └── static/                 # 静态页面 (5个)
+└── template-parts/             # 可复用组件
+
 ---
 
 ## 常见问题
@@ -199,6 +298,11 @@ sap-panda/
 - 确认主题已启用
 - 检查 Nginx 配置是否有 SPA 路由回退 (`try_files $uri $uri/ /index.html;`)
 - 检查浏览器控制台是否有 API 请求错误
+
+**Q: 页面空白 / 404 (Aladdin 主题)？**
+- 确认 aladdin 主题已启用
+- 访问 **设置 → 固定链接** 点击「保存更改」刷新路由
+- Aladdin 主题使用 `template_include` 过滤器处理路由，需要永久链接结构不是 `Plain`
 
 **Q: SSR 不工作 / 爬虫拿到的也是空 HTML？**
 - 确认 Node.js SSR 服务运行中: `pm2 list`
