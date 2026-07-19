@@ -14,7 +14,7 @@ const nextConfig = {
     return [
       {
         source: '/wp-json/:path*',
-        destination: `${process.env.NEXT_PUBLIC_WP_URL || 'http://localhost:8080'}/wp-json/:path*`,
+        destination: `${process.env.NEXT_PUBLIC_WP_URL || 'http://localhost'}/wp-json/:path*`,
       },
     ];
   },

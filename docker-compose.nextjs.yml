@@ -1,0 +1,50 @@
+# ============================================================
+# SAP Panda Next.js — Standalone Docker Compose
+#
+# この構成では Next.js SSR のみを Docker コンテナとして起動します。
+# WordPress は既に https://sap-navi.aladdin-techec.com に
+# デプロイ済みであることを前提とします。
+#
+# 使用方法:
+#   docker compose -f docker-compose.nextjs.yml up -d --build
+#   docker compose -f docker-compose.nextjs.yml logs -f
+#   docker compose -f docker-compose.nextjs.yml down
+# ============================================================
+# アーキテクチャ:
+#   Nginx (Host or 別コンテナ) → Next.js SSR (port 3000)
+#                                    ↓
+#                     https://sap-navi.aladdin-techec.com/
+#                      (既存 WordPress REST API)
+# ============================================================
+
+services:
+  nextjs:
+    build:
+      context: ./react_next
+      dockerfile: Dockerfile
+    image: sap-panda-nextjs:latest
+    container_name: sap-panda-nextjs
+    ports:
+      - "${NEXTJS_PORT:-3000}:3000"
+    environment:
+      PORT: 3000
+      NODE_ENV: production
+      HOSTNAME: 0.0.0.0
+      # WordPress 接続先（既存のリモートサーバー）
+      NEXT_PUBLIC_WP_URL: https://sap-navi.aladdin-techec.com
+      NEXT_PUBLIC_API_BASE: https://sap-navi.aladdin-techec.com/wp-json/sap/v1
+      NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://your-nextjs-domain.com}
+      NEXT_PUBLIC_GA_ID: ${NEXT_PUBLIC_GA_ID:-}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    # ログローテーション設定
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
