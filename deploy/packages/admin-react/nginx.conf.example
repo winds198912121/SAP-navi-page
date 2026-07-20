@@ -1,0 +1,173 @@
+# ============================================================
+# SAP Panda Academy — admin-react Nginx Production Config
+#
+# 架构:
+#   爬虫/搜索引擎 → SSR Node.js (port 3000)  → 完整 HTML
+#   正常用户      → SPA (index.html)
+#   API 请求      → WordPress (远程 or 本地)
+#
+# 部署:
+#   sudo cp nginx.conf.example /etc/nginx/sites-available/admin-react
+#   sudo ln -sf /etc/nginx/sites-available/admin-react /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+# ============================================================
+
+# ---- 机器人 User-Agent 检测 ----
+map $http_user_agent $is_bot {
+    default 0;
+    "~*(googlebot|bingbot|yandexbot|baiduspider|facebookexternalhit|twitterbot|whatsapp|slurp|bot|crawl|spider|pinterest|discordbot|slackbot|telegrambot|applebot|duckduckbot)" 1;
+}
+
+# ---- SSR 后端 ----
+upstream ssr_backend {
+    server 127.0.0.1:3000;
+    keepalive 32;
+}
+
+# ---- WordPress API 后端 ----
+upstream wp_api {
+    server 127.0.0.1:8080;
+    # 或远程 WordPress:
+    # server sap-navi.aladdin-techec.com:443;
+}
+
+server {
+    listen 80;
+    server_name your-domain.com;
+    # listen 443 ssl http2;
+    # ssl_certificate     /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+
+    # ---- 文档根目录（admin-react SPA 构建产物） ----
+    root /var/www/admin-react/html;
+    index index.html;
+
+    # ---- 安全标头 ----
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
+    # ---- Gzip 压缩 ----
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css text/xml text/javascript
+               application/javascript application/json
+               application/xml image/svg+xml;
+    gzip_min_length 256;
+    gzip_comp_level 6;
+
+    client_max_body_size 64M;
+
+    access_log /var/log/nginx/admin-react-access.log;
+    error_log  /var/log/nginx/admin-react-error.log;
+
+    # ---- 静态资源强缓存 ----
+    location /assets/ {
+        expires 365d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # ---- 公开静态文件 ----
+    location = /favicon.ico {
+        access_log off;
+        log_not_found off;
+    }
+    location = /robots.txt {
+        access_log off;
+        log_not_found off;
+    }
+
+    # ---- WordPress REST API 代理 ----
+    location /wp-json/ {
+        proxy_pass http://wp_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+
+        # 后端超时
+        proxy_connect_timeout 10s;
+        proxy_read_timeout 30s;
+        proxy_send_timeout 10s;
+    }
+
+    # ---- WordPress 后台代理 ----
+    location /wp-admin/ {
+        proxy_pass http://wp_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # ---- WordPress 静态资源代理 ----
+    location /wp-content/ {
+        proxy_pass http://wp_api;
+        expires 30d;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+    location /wp-includes/ {
+        proxy_pass http://wp_api;
+        expires 30d;
+        add_header Cache-Control "public";
+        access_log off;
+    }
+
+    # ---- 认证文件 ----
+    location ~ ^/(wp-login\.php|wp-signup\.php|xmlrpc\.php) {
+        proxy_pass http://wp_api;
+        proxy_set_header Host $host;
+    }
+
+    # ---- 健康检查 ----
+    location = /health {
+        proxy_pass http://ssr_backend/health;
+        access_log off;
+    }
+
+    # ---- SSR 渲染（爬虫/搜索引擎） ----
+    location / {
+        error_page 418 = @ssr;
+
+        if ($is_bot) {
+            return 418;
+        }
+
+        # 普通用户 → SPA
+        try_files $uri $uri/ /index.html;
+    }
+
+    # SSR 处理端点
+    location @ssr {
+        proxy_pass http://ssr_backend;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+
+        # SSR 渲染超时
+        proxy_read_timeout 15s;
+    }
+
+    # ---- 安全：隐藏文件和目录 ----
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+    location ~ /(?:uploads|files)/.*\.php$ {
+        deny all;
+    }
+    location ~ /wp-config.*\.php$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}

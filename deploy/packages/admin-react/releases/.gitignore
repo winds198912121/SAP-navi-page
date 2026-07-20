@@ -1,0 +1,6 @@
+# Deploy 构建产物（大文件，不提交到 Git）
+*.zip
+
+# 忽略所有文件，仅保留 .gitignore 自身
+*
+!.gitignore
