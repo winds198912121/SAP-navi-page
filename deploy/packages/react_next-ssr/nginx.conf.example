@@ -1,0 +1,133 @@
+# ============================================================
+# SAP Panda Academy — Next.js SSR Nginx Reverse Proxy Config
+#
+# Next.js SSR (port 3000) 的前段 Nginx 配置。
+# - SSL 終端
+# - 静的资源強力キャッシュ
+# - WP REST API のプロキシ（必要に応じて）
+# - セキュリティヘッダー
+#
+# 配置:
+#   sudo cp nginx.conf.example /etc/nginx/sites-available/sap-panda-nextjs
+#   sudo ln -sf /etc/nginx/sites-available/sap-panda-nextjs /etc/nginx/sites-enabled/
+#   sudo nginx -t && sudo systemctl reload nginx
+# ============================================================
+
+upstream nextjs {
+    server 127.0.0.1:3000;
+    # Docker 時のコンテナ名を使用する場合:
+    # server nextjs:3000;
+}
+
+server {
+    listen 80;
+    server_name your-nextjs-domain.com;
+
+    # ---- セキュリティヘッダー ----
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+
+    # ---- Gzip ----
+    gzip on;
+    gzip_vary on;
+    gzip_types text/plain text/css text/xml text/javascript
+               application/javascript application/json
+               application/xml image/svg+xml;
+    gzip_min_length 256;
+    gzip_comp_level 6;
+
+    client_max_body_size 64M;
+
+    access_log /var/log/nginx/sap-panda-access.log;
+    error_log  /var/log/nginx/sap-panda-error.log;
+
+    # ---- Next.js 静的アセット（強力キャッシュ） ----
+    location /_next/static/ {
+        proxy_pass http://nextjs;
+        expires 365d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    location /static/ {
+        proxy_pass http://nextjs;
+        expires 365d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # ---- 公開静的ファイル ----
+    location = /favicon.ico {
+        proxy_pass http://nextjs;
+        access_log off;
+        log_not_found off;
+    }
+
+    location = /robots.txt {
+        proxy_pass http://nextjs;
+        access_log off;
+        log_not_found off;
+    }
+
+    # ---- ヘルスチェック ----
+    location = /health {
+        proxy_pass http://nextjs;
+        access_log off;
+    }
+
+    # ---- WordPress API プロキシ（必要な場合のみ有効化） ----
+    # Next.js の rewrites で処理する場合は不要
+    #
+    # location /wp-json/ {
+    #     proxy_pass https://sap-navi.aladdin-techec.com;
+    #     proxy_set_header Host sap-navi.aladdin-techec.com;
+    #     proxy_set_header X-Real-IP $remote_addr;
+    #     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    #     proxy_set_header X-Forwarded-Proto $scheme;
+    # }
+    #
+    # location /wp-content/ {
+    #     proxy_pass https://sap-navi.aladdin-techec.com;
+    #     proxy_set_header Host sap-navi.aladdin-techec.com;
+    #     expires 30d;
+    #     add_header Cache-Control "public";
+    #     access_log off;
+    # }
+
+    # ---- メインルート：すべて Next.js SSR へ ----
+    location / {
+        proxy_pass http://nextjs;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_http_version 1.1;
+
+        # WebSocket サポート（Next.js HMR / dev 時）
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # ---- セキュリティ：隠しファイル拒否 ----
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+
+# ---- SSL 設定（証明書取得後に有効化） ----
+# server {
+#     listen 443 ssl http2;
+#     server_name your-nextjs-domain.com;
+#
+#     ssl_certificate     /etc/letsencrypt/live/your-nextjs-domain.com/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/your-nextjs-domain.com/privkey.pem;
+#     ssl_protocols TLSv1.2 TLSv1.3;
+#     ssl_ciphers HIGH:!aNULL:!MD5;
+#
+#     # port 80 と同じ location ブロックをここにコピー
+#     # （add_header Strict-Transport-Security 要追加）
+# }

@@ -1,0 +1,6 @@
+# Deploy build artifacts (large files, not committed to Git)
+*.zip
+
+# Ignore all files, only keep .gitignore itself
+*
+!.gitignore
