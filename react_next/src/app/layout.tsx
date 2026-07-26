@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
+import { Suspense } from 'react';
 import './globals.css';
-import Header from '@/components/layout/Header';
-import Footer from '@/components/layout/Footer';
+import ClientLayout from '@/components/layout/ClientLayout';
+import GoogleAnalytics from '@/components/layout/GoogleAnalytics';
 
 export const metadata: Metadata = {
   title: 'SAP パンダ先生 NAVI — SAP学習プラットフォーム',
@@ -22,9 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
       </head>
       <body>
-        <Header />
-        <main id="content">{children}</main>
-        <Footer />
+        <Suspense fallback={null}>
+          <GoogleAnalytics />
+        </Suspense>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

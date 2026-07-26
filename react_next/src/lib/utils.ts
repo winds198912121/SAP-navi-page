@@ -38,16 +38,49 @@ export function moduleColor(slug: string): string {
   return MODULE_COLORS[slug] || '#4CAF50';
 }
 
-export function difficultyLabel(level: string): string {
-  return DIFFICULTY_LABELS[level] || level;
+export function difficultyLabel(level: string | { slug?: string; name?: string }): string {
+  const slug = typeof level === 'string' ? level : level?.slug || '';
+  return DIFFICULTY_LABELS[slug] || slug;
 }
 
-export function difficultyClass(level: string): string {
-  return DIFFICULTY_CLASSES[level] || '';
+export function difficultyClass(level: string | { slug?: string; name?: string }): string {
+  const slug = typeof level === 'string' ? level : level?.slug || '';
+  return DIFFICULTY_CLASSES[slug] || '';
 }
 
 export function moduleName(slug: string): string {
   return MODULE_NAMES[slug] || slug.toUpperCase();
+}
+
+/** Extract module slug from article.modules array or article.module_slug */
+export function getModuleSlug(article: any): string {
+  if (article?.module_slug) return article.module_slug;
+  if (article?.modules?.[0]?.slug) return article.modules[0].slug;
+  if (article?.module?.slug) return article.module.slug;
+  if (article?.module && typeof article.module === 'string') return article.module;
+  return '';
+}
+
+/** Extract difficulty slug */
+export function getDifficultySlug(article: any): string {
+  if (typeof article?.difficulty === 'string') return article.difficulty;
+  if (article?.difficulty?.slug) return article.difficulty.slug;
+  return '';
+}
+
+/** Extract article date */
+export function getArticleDate(article: any): string {
+  return article?.date || article?.created_at || article?.post_date || '';
+}
+
+/** Extract path field with fallback */
+export function getPathField(path: any, field: string): any {
+  const fieldMap: Record<string, string> = {
+    target_audience: 'audience',
+    estimated_hours: 'estimated_time',
+    accent_color: 'color',
+  };
+  return path?.[field] ?? path?.[fieldMap[field]] ?? null;
 }
 
 export function formatDate(dateStr: string): string {

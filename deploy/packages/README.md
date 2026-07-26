@@ -7,9 +7,10 @@
 | 包 | 说明 | 版本 |
 |----|------|------|
 | [admin-react](./admin-react/) | React 管理后台前端 (SPA + SSR) | 1.0.0 |
-| [react_next-ssr](./react_next-ssr/) | Next.js SSR 版前端 | 1.0.0 |
-| [sap-panda-theme.zip](./sap-panda-theme.zip) | WordPress 管理 SPA 主题（React 构建产物） | 1.0.0 |
-| [sap-panda-api.zip](./sap-panda-api.zip) | WordPress REST API 插件 | 1.0.0 |
+| [react_next-ssr](./react_next-ssr/) | Next.js SSR 版前端（独立 Node.js 服务） | 2.0.0 |
+| [sap-panda-next-theme.zip](./sap-panda-next-theme.zip) | **方案A** Next.js 静态导出 → WordPress 主题模板（无需 Node 服务） | 2.0.0 |
+| [sap-panda-theme.zip](./sap-panda-theme.zip) | **方案B** WordPress SSR 代理主题（配合 Node.js SSR 使用） | 2.0.0 |
+| [sap-panda-api.zip](./sap-panda-api.zip) | WordPress REST API 插件 | 2.0.0 |
 
 ## 包结构约定
 

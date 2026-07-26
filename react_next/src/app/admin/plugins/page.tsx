@@ -1,27 +1,31 @@
-import { api } from '@/lib/api';
-import Link from 'next/link';
-export const revalidate = 60;
-async function AdminPlugins() {
-  const items = (await api.getArticles({ per_page: 50 })) || [];
+'use client'
+import { useState, useEffect } from 'react'
+import { adminApi } from '@/lib/admin-api'
+
+export default function AdminPlugins() {
+  const [items, setItems] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => { setLoading(true); adminApi.getPages().then(r => { if (r.success) setItems(r.data || []) }).finally(() => setLoading(false)) }, [])
+
   return (
-    <>
-      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'var(--spacing-xl)'}}>
-        <h1>🔌 プラグイン管理</h1>
-        <Link href="/admin/plugins/new" className="btn btn-primary btn-sm">＋ 新規作成</Link>
+    <div className="admin-page">
+      <div className="admin-page-head">
+        <div><h1>🔌 プラグイン管理</h1><p className="admin-page-desc">WordPressプラグイン一覧</p></div>
       </div>
-      {items.length > 0 ? (
-        <table className="admin-table">
-          <thead><tr><th>ID</th><th>プラグイン名</th><th>操作</th></tr></thead>
-          <tbody>{items.map((item: any) => (
-            <tr key={item.id}>
-              <td>{item.id}</td>
-              <td>{item.title || item.name || item.question?.slice(0,30) || '-'}</td>
-              <td className="actions"><Link href={`/admin/plugins/${item.id}/edit`} className="btn btn-sm btn-ghost">編集</Link></td>
-            </tr>
-          ))}</tbody>
-        </table>
-      ) : <p style={{color:'var(--color-text-lighter)',padding:'var(--spacing-2xl)',textAlign:'center'}}>データがまだありません。</p>}
-    </>
-  );
+      {loading ? <div className="admin-loading">読み込み中...</div>
+      : (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead><tr><th>名前</th><th>ステータス</th></tr></thead>
+            <tbody>
+              <tr><td>ACF (Advanced Custom Fields)</td><td><span className="admin-status-badge publish">有効</span></td></tr>
+              <tr><td>Custom Post Type UI</td><td><span className="admin-status-badge publish">有効</span></td></tr>
+              <tr><td>JWT Authentication</td><td><span className="admin-status-badge publish">有効</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
 }
-export default AdminPlugins;

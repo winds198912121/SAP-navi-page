@@ -1,33 +1,45 @@
 import { api } from '@/lib/api';
-import { moduleColor } from '@/lib/utils';
+import { getPathField } from '@/lib/utils';
 import Link from 'next/link';
 export const revalidate = 60;
 async function PathsPage() {
   const paths = await api.getLearningPaths();
   return (
-    <div className="container" style={{paddingTop:'var(--spacing-xl)',paddingBottom:'var(--spacing-2xl)'}}>
-      <nav className="breadcrumb"><Link href="/">ホーム</Link><span className="separator">›</span><span>学習パス</span></nav>
-      <h1>学習パス</h1>
+    <section className="section">
+      <div className="section-head">
+        <div><div className="label">Learning Paths</div><h2>学習パス</h2></div>
+        <div className="desc">目的別に最適な学習ルートを選びましょう</div>
+      </div>
       {paths && paths.length > 0 ? (
-        <div className="path-list">
-          {paths.map((p: any) => {
-            const color = p.accent_color || '#4CAF50';
-            return (
-              <Link key={p.id} href={`/learning/${p.id}`} className="path-card">
-                <div className="path-card-header" style={{background:color}}>
-                  <h3 className="path-card-title">{p.title}</h3>
-                  <p className="path-card-subtitle">{p.target_audience}</p>
+        <div className="path-grid">
+          {paths.map((p: any, i: number) => (
+            <Link key={p.id} href={`/learning/${p.id}`}
+              className={`path-card ${i === 1 ? 'p2' : i === 2 ? 'p3' : ''}`}>
+              <div className="num">{i + 1}</div>
+              <div className="audience">{getPathField(p, 'target_audience') || '全レベル'}</div>
+              <h3>{p.title}</h3>
+              <p>{p.description}</p>
+              {p.steps && (
+                <div className="path-steps">
+                  {p.steps.slice(0, 4).map((step: any, si: number) => (
+                    <div key={si} className="path-step">
+                      <span className="step-num">{si + 1}</span>
+                      <span className="step-title">{step.title}</span>
+                      {step.time && <span className="step-time">{step.time}</span>}
+                    </div>
+                  ))}
                 </div>
-                <div className="path-card-body">
-                  <div className="path-card-meta"><span>📚 {p.steps?.length || 0}ステップ</span>{p.estimated_hours && <span>⏱ {p.estimated_hours}時間</span>}</div>
-                  <p className="path-card-desc">{p.description}</p>
-                </div>
-              </Link>
-            );
-          })}
+              )}
+              <div className="path-meta">
+                <span>📚 {p.steps?.length || 0}ステップ</span>
+                {p.estimated_time && <span>⏱ {p.estimated_time}</span>}
+                <span className="arrow">→</span>
+              </div>
+            </Link>
+          ))}
         </div>
-      ) : <div className="empty-state">学習パスがまだありません。</div>}
-    </div>
+      ) : <div style={{ padding: 40, textAlign: 'center', color: 'var(--ink-3)' }}>学習パスがまだありません。</div>}
+    </section>
   );
 }
 export default PathsPage;

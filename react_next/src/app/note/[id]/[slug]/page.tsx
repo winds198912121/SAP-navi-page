@@ -1,3 +1,5 @@
+export { generateStaticParams } from './static-params';
+
 import { api } from '@/lib/api'; import { formatDate } from '@/lib/utils';
 import { notFound } from 'next/navigation'; import Link from 'next/link';
 interface Props { params: Promise<{ id: string; slug: string }> }

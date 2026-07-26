@@ -140,6 +140,14 @@ class SAP_Panda_REST {
                 return true;
             },
         ]);
+        register_rest_route('sap/v1', '/pages/(?P<id>\d+)', [
+            'methods' => ['PUT', 'DELETE'],
+            'callback' => function($r) {
+                if ($r->get_method() === 'DELETE') return $this->delete_site_page($r);
+                return $this->update_site_page_by_id($r);
+            },
+            'permission_callback' => [$this, 'check_admin'],
+        ]);
         register_rest_route('sap/v1', '/users/me', ['methods' => ['GET', 'PUT'], 'callback' => [$this, 'user_me'], 'permission_callback' => [$this, 'check_auth']]);
         register_rest_route('sap/v1', '/users/me/bookmarks', ['methods' => ['GET', 'POST', 'DELETE'], 'callback' => [$this, 'user_bookmarks'], 'permission_callback' => [$this, 'check_auth']]);
         // Points
@@ -985,6 +993,47 @@ class SAP_Panda_REST {
         }, $pages);
         if ($slug && !empty($data)) return new WP_REST_Response(['success' => true, 'data' => $data[0]]);
         return new WP_REST_Response(['success' => true, 'data' => $data]);
+    }
+
+    public function update_site_page_by_id($request) {
+        $id = (int) $request->get_param('id');
+        $body = $request->get_json_params() ?: [];
+        $post = get_post($id);
+        if (!$post || $post->post_type !== 'page') {
+            return new WP_REST_Response(['success' => false, 'message' => 'Page not found'], 404);
+        }
+        $update = ['ID' => $id];
+        if (isset($body['title'])) $update['post_title'] = sanitize_text_field($body['title']);
+        if (isset($body['content'])) $update['post_content'] = wp_kses_post($body['content']);
+        if (isset($body['slug'])) $update['post_name'] = sanitize_title($body['slug']);
+        $result = wp_update_post($update, true);
+        if (is_wp_error($result)) {
+            return new WP_REST_Response(['success' => false, 'message' => $result->get_error_message()], 500);
+        }
+        if (isset($body['subtitle'])) update_post_meta($id, 'page_subtitle', sanitize_text_field($body['subtitle']));
+        if (isset($body['meta'])) update_post_meta($id, 'page_meta', sanitize_textarea_field($body['meta']));
+        // Return updated page
+        $p = get_post($id);
+        return new WP_REST_Response(['success' => true, 'data' => [
+            'id' => $p->ID, 'title' => $p->post_title, 'slug' => $p->post_name,
+            'content' => apply_filters('the_content', $p->post_content),
+            'excerpt' => get_the_excerpt($p), 'updated_at' => $p->post_modified,
+            'subtitle' => get_post_meta($p->ID, 'page_subtitle', true) ?: '',
+            'meta' => get_post_meta($p->ID, 'page_meta', true) ?: '',
+        ]]);
+    }
+
+    public function delete_site_page($request) {
+        $id = (int) $request->get_param('id');
+        $post = get_post($id);
+        if (!$post || $post->post_type !== 'page') {
+            return new WP_REST_Response(['success' => false, 'message' => 'Page not found'], 404);
+        }
+        $deleted = wp_delete_post($id, true);
+        if (!$deleted) {
+            return new WP_REST_Response(['success' => false, 'message' => 'Failed to delete'], 500);
+        }
+        return new WP_REST_Response(['success' => true, 'data' => ['id' => $id]]);
     }
 
     public function update_site_page($request) {

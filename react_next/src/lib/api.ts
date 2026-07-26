@@ -1,8 +1,15 @@
 // ============================================================
 // REST API Client — Shared /wp-json/sap/v1/ endpoints
+//
+// Server Components use absolute URLs (required by Next.js fetch).
+// Client Components use relative URLs (proxied via rewrites).
 // ============================================================
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE || '/wp-json/sap/v1';
+// WordPress の絶対URL（Server Components 用）
+const WP_URL = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_WP_URL) || 'http://localhost';
+const API_BASE = (typeof process !== 'undefined' && process.env?.NEXT_PUBLIC_API_BASE) || `${WP_URL}/wp-json/sap/v1`;
+// クライアントコンポーネント用（ブラウザでは relative URL + rewrite で動作）
+export const PUBLIC_API_BASE = '/wp-json/sap/v1';
 
 interface FetchOptions extends RequestInit {
   params?: Record<string, any>;
@@ -32,7 +39,7 @@ async function apiRequest<T>(
   };
 
   try {
-    const res = await fetch(url, { ...fetchOpts, headers, next: { revalidate: 60 } });
+    const res = await fetch(url, { ...fetchOpts, headers });
     if (!res.ok) {
       console.error(`[API] ${res.status} ${url}`);
       return null;
@@ -77,7 +84,7 @@ export const api = {
   getLesson: (id: number) => apiRequest<any>(`lessons/${id}`),
 
   // Learning Paths
-  getLearningPaths: () => apiRequest<any[]>('learning-paths'),
+  getLearningPaths: (params?: Record<string, any>) => apiRequest<any[]>('learning-paths', { params }),
   getLearningPath: (id: number) => apiRequest<any>(`learning-paths/${id}`),
   getPathSteps: (pathId: number) =>
     apiRequest<any[]>(`learning-paths/${pathId}/steps`),
