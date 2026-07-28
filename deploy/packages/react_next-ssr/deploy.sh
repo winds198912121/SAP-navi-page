@@ -197,7 +197,7 @@ elif [ -n "$REMOTE_SERVER" ]; then
                     --env PORT=3000 \\
                     --env NEXT_PUBLIC_WP_URL=https://sap-navi.aladdin-techec.com \\
                     --env NEXT_PUBLIC_API_BASE=https://sap-navi.aladdin-techec.com/wp-json/sap/v1 \\
-                    --env NEXT_PUBLIC_SITE_URL=$REMOTE_HOST
+                    --env NEXT_PUBLIC_SITE_URL=https://sap-navi.aladdin-techec.com
             fi
             pm2 save
             echo '  ✅ Next.js SSR restarted via PM2'

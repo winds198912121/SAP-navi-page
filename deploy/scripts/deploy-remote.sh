@@ -40,7 +40,7 @@ else
 # リモートサーバー設定
 # このファイルを編集してからデプロイしてください
 # ============================================================
-REMOTE_SERVER="sap-panda.com"
+REMOTE_SERVER="sap-navi.aladdin-techec.com"
 REMOTE_USER="root"
 REMOTE_WP_PATH="/var/www/html"
 REMOTE_PORT="22"

@@ -4,7 +4,7 @@
 # 本番サーバーで 1 度だけ実行する SSR 環境セットアップ
 #
 # 使用方法:
-#   ssh root@sap-panda.com
+#   ssh root@sap-navi.aladdin-techec.com
 #   bash setup-ssr.sh
 # ============================================================
 set -e

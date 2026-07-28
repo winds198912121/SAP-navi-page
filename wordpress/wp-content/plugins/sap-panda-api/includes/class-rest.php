@@ -1394,11 +1394,11 @@ class SAP_Panda_REST {
                 'og_image' => '/panda-sensei.png',
                 'twitter_handle' => '@sap_panda',
                 'google_analytics_id' => '',
-                'robots_txt' => "User-agent: *\nAllow: /\nSitemap: https://sap-panda.com/sitemap.xml\nDisallow: /admin\nDisallow: /login\nDisallow: /register\nDisallow: /profile\nDisallow: /wp-admin\nDisallow: /wp-json/sap/v1/auth/\n",
+                'robots_txt' => "User-agent: *\nAllow: /\nSitemap: https://sap-navi.aladdin-techec.com/sitemap.xml\nDisallow: /admin\nDisallow: /login\nDisallow: /register\nDisallow: /profile\nDisallow: /wp-admin\nDisallow: /wp-json/sap/v1/auth/\n",
                 'geo_enabled' => true,
                 'organization_name' => 'SAP パンダ先生 NAVI',
                 'organization_logo' => '/panda-sensei.png',
-                'organization_url' => 'https://sap-panda.com',
+                'organization_url' => 'https://sap-navi.aladdin-techec.com',
                 'social_links' => [],
                 'ai_optimization' => true,
                 'faq_page_url' => '/faq',
@@ -1509,7 +1509,7 @@ class SAP_Panda_REST {
         $sitemap = '<?xml version="1.0" encoding="UTF-8"?>';
         $sitemap .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
-        $base = 'https://sap-panda.com';
+        $base = 'https://sap-navi.aladdin-techec.com';
         $today = current_time('Y-m-d');
 
         // Static pages

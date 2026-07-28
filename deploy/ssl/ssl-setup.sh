@@ -1,11 +1,11 @@
 #!/bin/bash
 # ============================================================
 # SAP パンダ先生 — Let's Encrypt SSL セットアップ
-# 事前にドメインの DNS 設定が必要 (sap-panda.com → サーバーIP)
+# 事前にドメインの DNS 設定が必要 (sap-navi.aladdin-techec.com → サーバーIP)
 # ============================================================
 set -e
 
-DOMAIN="${1:-sap-panda.com}"
+DOMAIN="${1:-sap-navi.aladdin-techec.com}"
 EMAIL="${2:-admin@panda-sensei.com}"
 
 echo "===================================="
