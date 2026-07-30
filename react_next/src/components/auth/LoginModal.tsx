@@ -37,7 +37,9 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
 
     setLoading(true)
     try {
+     
       const endpoint = tab === 'login' ? '/auth/login' : '/auth/register'
+       
       const body: any = { email, password }
       if (tab === 'register') body.name = name
       const res = await fetch(`${PUBLIC_API}${endpoint}`, {
