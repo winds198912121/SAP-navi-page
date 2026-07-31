@@ -41,7 +41,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       const endpoint = tab === 'login' ? '/auth/login' : '/auth/register'
        
       const body: any = { email, password }
-      if (tab === 'register') body.name = name
+      if (tab === 'register') body.display_name = name
       const res = await fetch(`${PUBLIC_API}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -49,7 +49,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
       })
       const json = await res.json()
       if (json.success && json.data?.token) {
-        document.cookie = `aladdin_token=${json.data.token}; path=/; max-age=86400`
+        document.cookie = `aladdin_token=${json.data.token}; path=/; max-age=${7 * 86400}`
         onClose()
         window.location.reload()
       } else {

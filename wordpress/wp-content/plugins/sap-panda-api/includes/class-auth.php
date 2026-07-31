@@ -260,7 +260,11 @@ class SAP_Panda_Auth {
 
         return new WP_REST_Response([
             'success' => true,
-            'data'    => ['user_id' => $user_id, 'message' => '登録が完了しました。確認メールをお送りしました。'],
+            'data'    => [
+                'user_id' => $user_id,
+                'token'   => $this->generate_token( $user_id ),
+                'message' => '登録が完了しました。確認メールをお送りしました。',
+            ],
         ], 201);
     }
 
